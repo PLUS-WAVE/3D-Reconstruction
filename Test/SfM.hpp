@@ -1,3 +1,4 @@
+#pragma once
 #include "openMVG/cameras/Camera_Common.hpp"
 #include "openMVG/cameras/Cameras_Common_command_line_helper.hpp"
 #include "openMVG/sfm/pipelines/sequential/sequential_SfM.hpp"
@@ -14,7 +15,7 @@
 #include "SfMPlyHelper.hpp"
 
 #include "third_party/cmdLine/cmdLine.h"
-#include "file_system.hpp"
+#include "third_party/stlplus3/filesystemSimplified/file_system.hpp"
 
 #include <cstdlib>
 #include <memory>

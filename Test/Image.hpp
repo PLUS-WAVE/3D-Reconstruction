@@ -1,3 +1,4 @@
+#pragma once
 #include <atomic>
 #include <cstdlib>
 #include <fstream>
@@ -24,7 +25,7 @@
 #include "openMVG/system/timer.hpp"
 
 #include "third_party/cmdLine/cmdLine.h"
-#include "file_system.hpp"
+#include "third_party/stlplus3/filesystemSimplified/file_system.hpp"
 
 #include <cereal/archives/json.hpp>
 #include <cereal/details/helpers.hpp>
@@ -144,7 +145,6 @@ features::EDESCRIBER_PRESET stringToEnum(const std::string& sPreset)
 int LoadingImages(
 	std::string InputImagePath,     //inputdir
 	std::string OutputPath,   //outputdir
-	std::string fileDatabase, //sensor width database
 	std::string Kmatrix,//eigen matrix
 	std::string sPriorWeights = "",
 	double focal_pixels = -1.0,
@@ -203,16 +203,6 @@ int LoadingImages(
 		return EXIT_FAILURE;
 	}
 
-	std::vector<Datasheet> vec_database;
-	if (!fileDatabase.empty())
-	{
-		if (!parseDatabase(fileDatabase, vec_database))
-		{
-			std::cerr
-				<< "\nÎÞÐ§µÄSenWidDB: " << fileDatabase << std::endl;
-			return EXIT_FAILURE;
-		}
-	}
 
 
 	if (!sPriorWeights.empty())
@@ -272,7 +262,7 @@ int LoadingImages(
 			if (focal_pixels != -1)
 				focal = focal_pixels;
 
-		if (focal == -1)
+		/*if (focal == -1)
 		{
 			std::unique_ptr<Exif_IO> exifReader(new Exif_IO_EasyExif);
 			exifReader->open(sImageFilename);
@@ -308,7 +298,7 @@ int LoadingImages(
 					}
 				}
 			}
-		}
+		}*/
 
 		std::shared_ptr<IntrinsicBase> intrinsic;
 
