@@ -3,6 +3,7 @@
 #include "SfM.hpp"
 #include "Image.hpp"
 #include "Match.hpp"
+#include "SfP.hpp"
 
 int main()
 {
@@ -10,7 +11,9 @@ int main()
 	// 1. Load images
 	std::string imagesInputDir = "TestData/images";
 	std::string matchesOutputDir = "TestData/images/Matches";
+	std::string sfmOutputDir = matchesOutputDir + "/sfm";
 	std::string EigenMatrix = "2905.88;0;1416;0;2905.88;1064;0;0;1";
+	std::string describerMethod = "AKAZE_FLOAT";
 	
 	if (LoadingImages(imagesInputDir, matchesOutputDir, EigenMatrix, "1.0;1.0;1.0") == EXIT_FAILURE)
 	{
@@ -18,8 +21,6 @@ int main()
 		return EXIT_FAILURE;
 	}
 	printf("加载图片成功\n");
-
-	std::string describerMethod = "AKAZE_FLOAT";
 
 	if (GetFeatures(matchesOutputDir + "/sfm_data.json", matchesOutputDir, describerMethod, "", true, false) == EXIT_FAILURE)
 	{
@@ -44,6 +45,53 @@ int main()
 	}
 	printf("匹配完成\n");
 	printf("\n任务完成\n");
+
+	StructureFromMotion
+	(
+		matchesOutputDir + "/sfm_data.json",
+		matchesOutputDir,
+		"",
+		sfmOutputDir,
+		"",
+		"",
+		"ADJUST_ALL",
+		3,
+		true,
+		true);
+
+
+	ConvertCoorsToOrigin
+	(
+		sfmOutputDir + "/sfm_data.bin",
+		sfmOutputDir
+	);
+
+	printf("进行点云上色\n");
+	PrintPointColors(sfmOutputDir + "/sfm_data_local.bin", sfmOutputDir + "/colored.ply");
+
+	printf("进行SFP重构\n");
+
+	StructureFromPoses(
+		sfmOutputDir + "/sfm_data_local.bin",
+		matchesOutputDir,
+		sfmOutputDir + "/robust.bin",
+		matchesOutputDir + "/matches.f.bin");
+
+	printf("进行点云上色\n");
+	PrintPointColors(sfmOutputDir + "/robust.bin", sfmOutputDir + "/robust_colored.ply");
+
+	printf("SFP重构成功\n");
+
+	printf("Data to MVS\n");
+	// ExportSparseCloud
+	// (
+	// 	sfmOutputDir + "/robust.bin",
+	// 	sfmOutputDir + "/SparseCloud.J3D",
+	// 	sfmOutputDir + "/undistorted_images",
+	// 	sfmOutputDir
+	// );
+	
+	printf("\n完成\n");
 
 	return 0;
 }

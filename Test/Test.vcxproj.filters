@@ -32,5 +32,11 @@
     <ClInclude Include="Match.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="SfP.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="SparseCloud.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
