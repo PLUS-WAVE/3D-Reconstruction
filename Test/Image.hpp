@@ -408,7 +408,7 @@ int LoadingImages(
 int GetFeatures(
 	std::string SFMDataFilename,
 	std::string OutputPath,
-	std::string ComputeMethod = "SIFT",
+	std::string ComputeMethod = "SIFT_ANATOMY",
 	std::string sFeaturePreset = "",
 	bool bUpRight = false,
 	bool bForce = false
@@ -421,7 +421,7 @@ int GetFeatures(
 	SfM_Data sfm_data;
 	if (!Load(sfm_data, SFMDataFilename, ESfM_Data(VIEWS | INTRINSICS)))
 	{
-		std::cerr << "输入图片无法读取 \"" << SFMDataFilename << "\" " << std::endl;
+		std::cerr << "输入图片无法读取 \"" << SFMDataFilename << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -485,12 +485,12 @@ int GetFeatures(
 		std::ofstream stream(sImage_describer.c_str());
 		if (!stream.is_open())
 			return EXIT_FAILURE;
-
-		cereal::JSONOutputArchive archive(stream);
-		archive(cereal::make_nvp("image_describer", image_describer));
-		auto regionsType = image_describer->Allocate();
-		archive(cereal::make_nvp("regions_type", regionsType));
-		
+		{
+			cereal::JSONOutputArchive archive(stream);
+			archive(cereal::make_nvp("image_describer", image_describer));
+			auto regionsType = image_describer->Allocate();
+			archive(cereal::make_nvp("regions_type", regionsType));
+		}
 	}
 
 
@@ -568,6 +568,6 @@ int GetFeatures(
 		}
 	}
 	std::cout << "任务完成，用时(秒): " << timer.elapsed() << std::endl;
-	
+
 	return EXIT_SUCCESS;
 }
