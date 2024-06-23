@@ -1,5 +1,3 @@
-#define LEMON_SCOPE_FIX(OUTER, NESTED) typename OUTER::template NESTED
-
 #include "SfM.hpp"
 #include "Image.hpp"
 #include "Match.hpp"
@@ -27,7 +25,7 @@ int main()
 		printf("获取特征信息失败\n");
 		return EXIT_FAILURE;
 	}
-	printf("获取特征点完成\n");
+	printf("获取特征点完成\n\n");
 
 
 	if (GetMatches(
@@ -42,12 +40,11 @@ int main()
 		0.8, true) == EXIT_FAILURE)
 	{
 		printf("匹配特征信息失败\n");
+		return EXIT_FAILURE;
 	}
 	printf("匹配完成\n");
-	printf("\n任务完成\n");
 
-	StructureFromMotion
-	(
+	if (StructureFromMotion(
 		matchesOutputDir + "/sfm_data.json",
 		matchesOutputDir,
 		"",
@@ -57,7 +54,12 @@ int main()
 		"ADJUST_ALL",
 		3,
 		true,
-		true);
+		true))
+	{
+		printf("SfM失败\n");
+		return EXIT_FAILURE;
+	}
+	printf("SfM完成\n");
 
 
 	ConvertCoorsToOrigin

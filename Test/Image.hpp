@@ -24,7 +24,6 @@
 #include "openMVG/features/regions_factory_io.hpp"
 #include "openMVG/system/timer.hpp"
 
-#include "third_party/cmdLine/cmdLine.h"
 #include "third_party/stlplus3/filesystemSimplified/file_system.hpp"
 
 #include <cereal/archives/json.hpp>
@@ -73,16 +72,13 @@ std::pair<bool, Vec3> checkGPS(const std::string& filename, const int& GPS_to_XY
 	std::unique_ptr<Exif_IO> exifReader(new Exif_IO_EasyExif);
 	if (exifReader)
 	{
-
 		if (exifReader->open(filename) && exifReader->doesHaveExifInfo())
 		{
-
 			double latitude, longitude, altitude;
 			if (exifReader->GPSLatitude(&latitude) &&
 				exifReader->GPSLongitude(&longitude) &&
 				exifReader->GPSAltitude(&altitude))
 			{
-
 				val.first = true;
 				switch (GPS_to_XYZ_method)
 				{
@@ -131,21 +127,19 @@ features::EDESCRIBER_PRESET stringToEnum(const std::string& sPreset)
 	features::EDESCRIBER_PRESET preset;
 	if (sPreset == "NORMAL")
 		preset = features::NORMAL_PRESET;
+	else if (sPreset == "HIGH")
+		preset = features::HIGH_PRESET;
+	else if (sPreset == "ULTRA")
+		preset = features::ULTRA_PRESET;
 	else
-		if (sPreset == "HIGH")
-			preset = features::HIGH_PRESET;
-		else
-			if (sPreset == "ULTRA")
-				preset = features::ULTRA_PRESET;
-			else
-				preset = features::EDESCRIBER_PRESET(-1);
+		preset = features::EDESCRIBER_PRESET(-1);
 	return preset;
 }
 
 int LoadingImages(
-	std::string InputImagePath,     //inputdir
-	std::string OutputPath,   //outputdir
-	std::string Kmatrix,//eigen matrix
+	std::string InputImagePath, //inputdir
+	std::string OutputPath, //outputdir
+	std::string Kmatrix, //eigen matrix
 	std::string sPriorWeights = "",
 	double focal_pixels = -1.0,
 	int i_User_camera_model = PINHOLE_CAMERA_RADIAL3,
@@ -163,7 +157,8 @@ int LoadingImages(
 
 	if (Kmatrix.size() == 0)
 	{
-		std::cout << "未手动输入本征矩阵,程序自适应计算本征 " << Kmatrix << std::endl;
+		std::cout << "未输入本征矩阵" << Kmatrix << std::endl;
+		return EXIT_FAILURE;
 	}
 
 	double width = -1, height = -1, focal = -1, ppx = -1, ppy = -1;
@@ -199,10 +194,9 @@ int LoadingImages(
 
 	if (Kmatrix.size() > 0 && focal_pixels != -1.0)
 	{
-		std::cerr << "\n无效的相机IntrPMT " << std::endl;
+		std::cerr << "\n无效的相机内参 " << std::endl;
 		return EXIT_FAILURE;
 	}
-
 
 
 	if (!sPriorWeights.empty())
@@ -220,8 +214,8 @@ int LoadingImages(
 
 	std::ostringstream error_report_stream;
 	for (std::vector<std::string>::const_iterator iter_image = vec_image.begin();
-		iter_image != vec_image.end();
-		++iter_image)
+	     iter_image != vec_image.end();
+	     ++iter_image)
 	{
 		width = height = ppx = ppy = focal = -1.0;
 
@@ -258,9 +252,8 @@ int LoadingImages(
 			if (!checkIntrinsicStringValidity(Kmatrix, focal, ppx, ppy))
 				focal = -1.0;
 		}
-		else
-			if (focal_pixels != -1)
-				focal = focal_pixels;
+		else if (focal_pixels != -1)
+			focal = focal_pixels;
 
 		/*if (focal == -1)
 		{
@@ -304,7 +297,6 @@ int LoadingImages(
 
 		if (focal > 0 && ppx > 0 && ppy > 0 && width > 0 && height > 0)
 		{
-
 			switch (e_User_camera_model)
 			{
 			case PINHOLE_CAMERA:
@@ -345,12 +337,10 @@ int LoadingImages(
 
 			if (intrinsic == nullptr)
 			{
-
 				v.id_intrinsic = UndefinedIndexT;
 			}
 			else
 			{
-
 				intrinsics[v.id_intrinsic] = intrinsic;
 			}
 
@@ -372,12 +362,10 @@ int LoadingImages(
 
 			if (intrinsic == nullptr)
 			{
-
 				v.id_intrinsic = UndefinedIndexT;
 			}
 			else
 			{
-
 				intrinsics[v.id_intrinsic] = intrinsic;
 			}
 
@@ -426,7 +414,6 @@ int GetFeatures(
 	bool bForce = false
 )
 {
-
 	std::cout
 		<< "\n" << "特征点算法:" << ComputeMethod << std::endl;
 
@@ -445,7 +432,6 @@ int GetFeatures(
 	const std::string sImage_describer = stlplus::create_filespec(OutputPath, "image_describer", "json");
 	if (!bForce && stlplus::is_file(sImage_describer))
 	{
-
 		std::ifstream stream(sImage_describer.c_str());
 		if (!stream.is_open())
 			return EXIT_FAILURE;
@@ -464,98 +450,102 @@ int GetFeatures(
 	}
 	else
 	{
-
-		if (ComputeMethod == "SIFT")
+		if (ComputeMethod == "SIFT_ANATOMY")
 		{
-			//image_describer.reset(new SIFT_Image_describer
-			//(SIFT_Image_describer::Params(), !bUpRight));
 			image_describer.reset(
 				new SIFT_Anatomy_Image_describer(SIFT_Anatomy_Image_describer::Params()));
 		}
-		else
-			if (ComputeMethod == "SIFT_ANATOMY")
-			{
-				image_describer.reset(
-					new SIFT_Anatomy_Image_describer(SIFT_Anatomy_Image_describer::Params()));
-			}
-			else
-				if (ComputeMethod == "AKAZE_FLOAT")
-				{
-					image_describer = AKAZE_Image_describer::create
-					(AKAZE_Image_describer::Params(AKAZE::Params(), AKAZE_MSURF), !bUpRight);
-				}
-				else
-					if (ComputeMethod == "AKAZE_MLDB")
-					{
-						image_describer = AKAZE_Image_describer::create
-						(AKAZE_Image_describer::Params(AKAZE::Params(), AKAZE_MLDB), !bUpRight);
-					}
+		else if (ComputeMethod == "AKAZE_FLOAT")
+		{
+			image_describer = AKAZE_Image_describer::create
+				(AKAZE_Image_describer::Params(AKAZE::Params(), AKAZE_MSURF), !bUpRight);
+		}
+		else if (ComputeMethod == "AKAZE_MLDB")
+		{
+			image_describer = AKAZE_Image_describer::create
+				(AKAZE_Image_describer::Params(AKAZE::Params(), AKAZE_MLDB), !bUpRight);
+		}
+
 		if (!image_describer)
 		{
 			std::cerr << "无法创建describer "
 				<< ComputeMethod << "." << std::endl;
 			return EXIT_FAILURE;
 		}
-		else
-		{
-			if (!sFeaturePreset.empty())
-				if (!image_describer->Set_configuration_preset(stringToEnum(sFeaturePreset)))
-				{
-					std::cerr << "预设配置失败 " << std::endl;
-					return EXIT_FAILURE;
-				}
-		}
 
 
-		{
-			std::ofstream stream(sImage_describer.c_str());
-			if (!stream.is_open())
+		if (!sFeaturePreset.empty())
+			if (!image_describer->Set_configuration_preset(stringToEnum(sFeaturePreset)))
+			{
+				std::cerr << "预设配置失败 " << std::endl;
 				return EXIT_FAILURE;
+			}
 
-			cereal::JSONOutputArchive archive(stream);
-			archive(cereal::make_nvp("image_describer", image_describer));
-			auto regionsType = image_describer->Allocate();
-			archive(cereal::make_nvp("regions_type", regionsType));
-		}
+
+		std::ofstream stream(sImage_describer.c_str());
+		if (!stream.is_open())
+			return EXIT_FAILURE;
+
+		cereal::JSONOutputArchive archive(stream);
+		archive(cereal::make_nvp("image_describer", image_describer));
+		auto regionsType = image_describer->Allocate();
+		archive(cereal::make_nvp("regions_type", regionsType));
+		
 	}
 
 
+	system::Timer timer;
+	Image<unsigned char> imageGray;
+
+	std::atomic<bool> preemptive_exit(false);
+
+
+	for (int i = 0; i < static_cast<int>(sfm_data.views.size()); ++i)
 	{
-		system::Timer timer;
-		Image<unsigned char> imageGray;
+		Views::const_iterator iterViews = sfm_data.views.begin();
+		std::advance(iterViews, i);
+		const View* view = iterViews->second.get();
+		const std::string
+			sView_filename = stlplus::create_filespec(sfm_data.s_root_path, view->s_Img_path),
+			sFeat = stlplus::create_filespec(OutputPath, stlplus::basename_part(sView_filename), "feat"),
+			sDesc = stlplus::create_filespec(OutputPath, stlplus::basename_part(sView_filename), "desc");
 
-		std::atomic<bool> preemptive_exit(false);
 
-
-		for (int i = 0; i < static_cast<int>(sfm_data.views.size()); ++i)
+		if (!preemptive_exit && (bForce || !stlplus::file_exists(sFeat) || !stlplus::file_exists(sDesc)))
 		{
-			Views::const_iterator iterViews = sfm_data.views.begin();
-			std::advance(iterViews, i);
-			const View* view = iterViews->second.get();
+			if (!ReadImage(sView_filename.c_str(), &imageGray))
+				continue;
+
+			Image<unsigned char>* mask = nullptr;
+
 			const std::string
-				sView_filename = stlplus::create_filespec(sfm_data.s_root_path, view->s_Img_path),
-				sFeat = stlplus::create_filespec(OutputPath, stlplus::basename_part(sView_filename), "feat"),
-				sDesc = stlplus::create_filespec(OutputPath, stlplus::basename_part(sView_filename), "desc");
+				mask_filename_local = stlplus::create_filespec(sfm_data.s_root_path,
+				                                               stlplus::basename_part(sView_filename) + "_mask",
+				                                               "png"),
+				mask__filename_global = stlplus::create_filespec(sfm_data.s_root_path, "mask", "png");
 
+			Image<unsigned char> imageMask;
 
-			if (!preemptive_exit && (bForce || !stlplus::file_exists(sFeat) || !stlplus::file_exists(sDesc)))
+			if (stlplus::file_exists(mask_filename_local))
 			{
-				if (!ReadImage(sView_filename.c_str(), &imageGray))
-					continue;
-
-				Image<unsigned char>* mask = nullptr;
-
-				const std::string
-					mask_filename_local = stlplus::create_filespec(sfm_data.s_root_path, stlplus::basename_part(sView_filename) + "_mask", "png"),
-					mask__filename_global = stlplus::create_filespec(sfm_data.s_root_path, "mask", "png");
-
-				Image<unsigned char> imageMask;
-
-				if (stlplus::file_exists(mask_filename_local))
+				if (!ReadImage(mask_filename_local.c_str(), &imageMask))
 				{
-					if (!ReadImage(mask_filename_local.c_str(), &imageMask))
+					std::cerr << "错误MASK: " << mask_filename_local << std::endl
+						<< "停止工作 " << std::endl;
+					preemptive_exit = true;
+					continue;
+				}
+
+				if (imageMask.Width() == imageGray.Width() && imageMask.Height() == imageGray.Height())
+					mask = &imageMask;
+			}
+			else
+			{
+				if (stlplus::file_exists(mask__filename_global))
+				{
+					if (!ReadImage(mask__filename_global.c_str(), &imageMask))
 					{
-						std::cerr << "错误MASK: " << mask_filename_local << std::endl
+						std::cerr << "错误MASK: " << mask__filename_global << std::endl
 							<< "停止工作 " << std::endl;
 						preemptive_exit = true;
 						continue;
@@ -564,41 +554,20 @@ int GetFeatures(
 					if (imageMask.Width() == imageGray.Width() && imageMask.Height() == imageGray.Height())
 						mask = &imageMask;
 				}
-				else
-				{
-
-					if (stlplus::file_exists(mask__filename_global))
-					{
-						if (!ReadImage(mask__filename_global.c_str(), &imageMask))
-						{
-							std::cerr << "错误MASK: " << mask__filename_global << std::endl
-								<< "停止工作 " << std::endl;
-							preemptive_exit = true;
-							continue;
-						}
-
-						if (imageMask.Width() == imageGray.Width() && imageMask.Height() == imageGray.Height())
-							mask = &imageMask;
-					}
-				}
-
-
-				auto regions = image_describer->Describe(imageGray, mask);
-				if (regions && !image_describer->Save(regions.get(), sFeat, sDesc))
-				{
-					std::cerr << "无法保存图片信息: " << sView_filename << std::endl
-						<< "停止工作 " << std::endl;
-					preemptive_exit = true;
-					continue;
-				}
 			}
 
+
+			auto regions = image_describer->Describe(imageGray, mask);
+			if (regions && !image_describer->Save(regions.get(), sFeat, sDesc))
+			{
+				std::cerr << "无法保存图片信息: " << sView_filename << std::endl
+					<< "停止工作 " << std::endl;
+				preemptive_exit = true;
+				continue;
+			}
 		}
-		std::cout << "任务完成，用时(秒): " << timer.elapsed() << std::endl;
 	}
+	std::cout << "任务完成，用时(秒): " << timer.elapsed() << std::endl;
+	
 	return EXIT_SUCCESS;
 }
-
-
-
-

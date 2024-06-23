@@ -27,7 +27,7 @@
     <ClInclude Include="SfM.hpp" />
     <ClInclude Include="SfMPlyHelper.hpp" />
     <ClInclude Include="SfP.hpp" />
-    <ClInclude Include="SparseCloud.hpp" />
+    <ClInclude Include="SfMtoMVG.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
