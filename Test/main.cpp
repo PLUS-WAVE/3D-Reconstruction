@@ -8,11 +8,18 @@ int main()
 
 	// 1. Load images
 	std::string imagesInputDir = "TestData/images";
-	std::string matchesOutputDir = "TestData/images/Matches";
-	std::string sfmOutputDir = matchesOutputDir + "/sfm";
+	std::string matchesOutputDir = "TestData/images/Output/Describers&Matches";
+	std::string sfmOutputDir = "TestData/images/Output/SfM_Output";
 	std::string EigenMatrix = "2905.88;0;1416;0;2905.88;1064;0;0;1";
 	std::string describerMethod = "AKAZE_FLOAT";
+
+	if (!stlplus::folder_create("TestData/images/Output"))
+	{
+		printf("创建文件夹失败\n");
+		return EXIT_FAILURE;
+	}
 	
+
 	if (LoadingImages(imagesInputDir, matchesOutputDir, EigenMatrix) == EXIT_FAILURE)
 	{
 		printf("加载图片失败\n");
@@ -20,7 +27,7 @@ int main()
 	}
 	printf("加载图片成功\n");
 
-	if (GetFeatures(matchesOutputDir + "/sfm_data.json", matchesOutputDir, describerMethod, "", true, true) == EXIT_FAILURE)
+	if (GetFeatures(matchesOutputDir + "/sfm_data.json", matchesOutputDir, describerMethod, "", true, false) == EXIT_FAILURE)
 	{
 		printf("获取特征信息失败\n");
 		return EXIT_FAILURE;
@@ -42,17 +49,24 @@ int main()
 		printf("匹配特征信息失败\n");
 		return EXIT_FAILURE;
 	}
-	printf("匹配完成\n");
+	printf("匹配完成\n\n");
+
+	std::cout
+		<< "\n-----------------------------------------------------------"
+		<< "\n Structure from Motion:"
+		<< "\n-----------------------------------------------------------"
+		<< std::endl;
 
 	if (StructureFromMotion(
 		matchesOutputDir + "/sfm_data.json",
 		matchesOutputDir,
-		"",
+		"matches.f.bin", // GetMatches 中 sGeometricModel = "f"
 		sfmOutputDir,
 		"",
 		"",
 		"ADJUST_ALL",
-		3,
+		"ADJUST_ALL",
+		PINHOLE_CAMERA_RADIAL3,
 		true,
 		true))
 	{
@@ -69,22 +83,24 @@ int main()
 	);
 
 	printf("进行点云上色\n");
-	PrintPointColors(sfmOutputDir + "/sfm_data_local.bin", sfmOutputDir + "/colored.ply");
+	PrintPointColors(sfmOutputDir + "/sfm_data_local.bin", sfmOutputDir + "/sfm_data_local_colored.ply");
 
-	printf("进行SFP重构\n");
+	std::cout
+		<< "\n-----------------------------------------------------------"
+		<< "\n Compute Structure From Known Poses:"
+		<< "\n-----------------------------------------------------------"
+		<< std::endl;
 
 	StructureFromPoses(
 		sfmOutputDir + "/sfm_data_local.bin",
 		matchesOutputDir,
-		sfmOutputDir + "/robust.bin",
+		sfmOutputDir + "/sfp_data.bin",
 		matchesOutputDir + "/matches.f.bin");
 
-	printf("进行点云上色\n");
-	PrintPointColors(sfmOutputDir + "/robust.bin", sfmOutputDir + "/robust_colored.ply");
+	printf("\n进行点云上色\n");
+	PrintPointColors(sfmOutputDir + "/sfp_data.bin", sfmOutputDir + "/sfp_data_colored.ply");
 
-	printf("SFP重构成功\n");
-
-	printf("Data to MVS\n");
+	printf("\nData to MVS\n");
 	// ExportSparseCloud
 	// (
 	// 	sfmOutputDir + "/robust.bin",

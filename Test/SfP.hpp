@@ -1,9 +1,8 @@
 #pragma once
 
 #include "openMVG/cameras/Camera_Common.hpp"
-#include "openMVG/features/feature.hpp"
 #include "openMVG/features/svg_features.hpp"
-#include "openMVG/geometry/frustum.hpp"
+
 #include "openMVG/matching/indMatch.hpp"
 #include "openMVG/matching/indMatch_utils.hpp"
 #include "openMVG/matching_image_collection/Pair_Builder.hpp"
@@ -21,8 +20,6 @@
 #include "openMVG/system/timer.hpp"
 #include "openMVG/types.hpp"
 
-#include "third_party/cmdLine/cmdLine.h"
-// #include "third_party/progress/progress_display.hpp"
 
 #include <iostream>
 #include <memory>
@@ -36,7 +33,7 @@ using namespace std;
 Pair_Set BuildPairsFromFrustumsIntersections(
 	const SfM_Data& sfm_data,
 	const double z_near = -1., // default near plane
-	const double z_far = -1.)  // default far plane
+	const double z_far = -1.) // default far plane
 {
 	const Frustum_Filter frustum_filter(sfm_data, z_near, z_far);
 	return frustum_filter.getFrustumIntersectionPairs();
@@ -56,13 +53,9 @@ int StructureFromPoses(
 	bool direct_triangulation = false
 )
 {
-
-	std::cout << "计算SFP" << std::endl;
-
-
 	if (!isValid(static_cast<ETriangulationMethod>(triangulation_method)))
 	{
-		std::cerr << "\n 无效的空三方法" << std::endl;
+		std::cerr << "\n 无效的方法" << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -71,7 +64,7 @@ int StructureFromPoses(
 	if (!Load(sfm_data, sSfM_Data_Filename, ESfM_Data(VIEWS | INTRINSICS | EXTRINSICS)))
 	{
 		std::cerr << std::endl
-			<< "输入的SfM_Data文件 \"" << sSfM_Data_Filename << "\" 无法读取." << std::endl;
+			<< "输入的 SfM_Data 文件 \"" << sSfM_Data_Filename << "\" 无法读取." << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -81,44 +74,37 @@ int StructureFromPoses(
 	std::unique_ptr<Regions> regions_type = Init_region_type_from_file(sImage_describer);
 	if (!regions_type)
 	{
-		std::cerr << "无效的: "
-			<< sImage_describer << " regions 文件." << std::endl;
+		std::cerr << "无效的: " << sImage_describer << "regions文件" << std::endl;
 		return EXIT_FAILURE;
 	}
-
 
 	std::shared_ptr<Regions_Provider> regions_provider;
 	if (ui_max_cache_size == 0)
 	{
-
 		regions_provider = std::make_shared<Regions_Provider>();
 	}
 	else
 	{
-
 		regions_provider = std::make_shared<Regions_Provider_Cache>(ui_max_cache_size);
 	}
 
 	if (!regions_provider->load(sfm_data, sMatchesDir, regions_type))
 	{
-		std::cerr << std::endl
-			<< "无效的regions." << std::endl;
+		std::cerr << "无效的regions." << std::endl;
 		return EXIT_FAILURE;
 	}
 
-	/*std::cout
-		<< "读取sfm_data:\n"
+	std::cout
+		<< "读取 sfm_data:\n"
 		<< " #views: " << sfm_data.GetViews().size() << "\n"
 		<< " #poses: " << sfm_data.GetPoses().size() << "\n"
 		<< " #intrinsics: " << sfm_data.GetIntrinsics().size() << "\n"
-		<< " #tracks: " << sfm_data.GetLandmarks().size()
-		<< std::endl;*/
+		<< std::endl;
 
 	const bool bDirect_triangulation = direct_triangulation;
 
 	if (bDirect_triangulation)
 	{
-
 		if (sMatchFile.empty() || !sPairFile.empty())
 		{
 			std::cerr << "匹配文件无法读取" << std::endl;
@@ -135,7 +121,6 @@ int StructureFromPoses(
 		const int min_track_length = 2;
 		openMVG::tracks::STLMAPTracks tracks;
 		{
-
 			std::cout << "\n" << "建立跟踪函数" << std::endl;
 			tracks::TracksBuilder tracks_builder;
 			tracks_builder.Build(matches);
@@ -143,7 +128,6 @@ int StructureFromPoses(
 			tracks_builder.Filter(min_track_length);
 
 			tracks_builder.ExportToSTL(tracks);
-
 
 			{
 				std::ostringstream track_stream;
@@ -153,7 +137,7 @@ int StructureFromPoses(
 				track_stream
 					<< "跟踪特征数: " << tracks_builder.NbTracks() << "\n";
 				std::copy(images_id.begin(), images_id.end(),
-					std::ostream_iterator<uint32_t>(track_stream, ", "));
+				          std::ostream_iterator<uint32_t>(track_stream, ", "));
 
 				std::map<uint32_t, uint32_t> track_length_histogram;
 				tracks::TracksUtilsMap::TracksLength(tracks, track_length_histogram);
@@ -177,7 +161,7 @@ int StructureFromPoses(
 				const auto imaIndex = track_it.first;
 				const auto featIndex = track_it.second;
 				const Vec2& pt = regions_provider->get(imaIndex)->GetRegionPosition(featIndex);
-				obs[imaIndex] = { pt, featIndex };
+				obs[imaIndex] = {pt, featIndex};
 			}
 			++idx;
 		}
@@ -193,12 +177,11 @@ int StructureFromPoses(
 				static_cast<ETriangulationMethod>(triangulation_method),
 				console_verbose);
 			structure_estimator.triangulate(sfm_data);
-			std::cout << "\n@空中三角测量用时: " << timer.elapsedMs() << std::endl;
+			std::cout << "\n三角测量用时: " << timer.elapsedMs() << std::endl;
 		}
 	}
 	else
 	{
-
 		Pair_Set pairs;
 		if (sMatchFile.empty() && sPairFile.empty())
 		{
@@ -237,23 +220,17 @@ int StructureFromPoses(
 
 		SfM_Data_Structure_Estimation_From_Known_Poses structure_estimator(dMax_reprojection_error);
 		structure_estimator.run(sfm_data, pairs, regions_provider,
-			static_cast<ETriangulationMethod>(triangulation_method));
-		std::cout << "\n重建预估时间(s): " << timer.elapsed() << "." << std::endl;
-
+		                        static_cast<ETriangulationMethod>(triangulation_method));
+		std::cout << "\n重建时间(s): " << timer.elapsed() << std::endl;
 	}
+
 	regions_provider.reset();
 	RemoveOutliers_AngleError(sfm_data, 2.0);
 
-	std::cout
-		<< "\n#找到landmark: " << sfm_data.GetLandmarks().size() << std::endl;
-
-	std::cout << "输出报告" << std::endl;
-	Generate_SfM_Report(sfm_data,
-		stlplus::create_filespec(stlplus::folder_part(sOutFile), "SfMRep.tml"));
+	Generate_SfM_Report(sfm_data, stlplus::create_filespec(stlplus::folder_part(sOutFile) + "/SfM_LogData", "SfP_log.html"));
 
 	if (bundle_adjustment)
 	{
-
 		const IndexT minPointPerPose = 12; // 6 min
 		const IndexT minTrackLength = 3; // 2 min
 		if (eraseUnstablePosesAndObservations(sfm_data, minPointPerPose, minTrackLength))
@@ -266,7 +243,7 @@ int StructureFromPoses(
 				<< "\t #3DPoints: " << pointcount_cleaning << "\n";
 		}
 
-		std::cout << "Bundle调整..." << std::endl;
+		std::cout << "\nBundle Adjustment: " << std::endl;
 		Bundle_Adjustment_Ceres bundle_adjustment_obj;
 		bundle_adjustment_obj.Adjust
 		(
@@ -278,21 +255,13 @@ int StructureFromPoses(
 		);
 	}
 
-	//std::cout
-	//	<< "找到sfm_data scene:\n"
-	//	<< " #views: " << sfm_data.GetViews().size() << "\n"
-	//	<< " #poses: " << sfm_data.GetPoses().size() << "\n"
-	//	<< " #intrinsics: " << sfm_data.GetIntrinsics().size() << "\n"
-	//	<< " #tracks: " << sfm_data.GetLandmarks().size()
-	//	<< std::endl;
-
 	if (stlplus::extension_part(sOutFile) != "ply")
 	{
 		Save(sfm_data,
-			stlplus::create_filespec(
-				stlplus::folder_part(sOutFile),
-				stlplus::basename_part(sOutFile), "ply"),
-			ESfM_Data(ALL));
+		     stlplus::create_filespec(
+			     stlplus::folder_part(sOutFile),
+			     stlplus::basename_part(sOutFile), "ply"),
+		     ESfM_Data(ALL));
 	}
 
 	if (Save(sfm_data, sOutFile, ESfM_Data(ALL)))
@@ -301,4 +270,3 @@ int StructureFromPoses(
 	}
 	return EXIT_FAILURE;
 }
-
