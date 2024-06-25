@@ -6,14 +6,14 @@
 #include "openMVG/sfm/sfm_data_io.hpp"
 
 #define _USE_EIGEN
-#include <software/SfM/export/InterfaceMVS.h>
-#include "third_party/cmdLine/cmdLine.h"
+
+#include "InterfaceMVS.hpp"
 #include "third_party/stlplus3/filesystemSimplified/file_system.hpp"
-#include "third_party/progress/progress_display.hpp"
 
 #include <atomic>
 #include <cstdlib>
 #include <string>
+#include <io.h>
 
 #ifdef OPENMVG_USE_OPENMP
 #include <omp.h>
@@ -37,7 +37,7 @@ bool exportToSparse(
 		stlplus::folder_create(sOutDir);
 		if (!stlplus::is_folder(sOutDir))
 		{
-			std::cerr << "无法访问输出目录，请检查权限，或使用管理员身份运行 " << std::endl;
+			std::cerr << "无法访问输出目录" << std::endl;
 			return false;
 		}
 	}
@@ -45,9 +45,6 @@ bool exportToSparse(
 	MVS::Interface scene;
 	size_t nPoses(0);
 	const uint32_t nViews((uint32_t)sfm_data.GetViews().size());
-
-	C_Progress_display my_progress_bar(nViews,
-		std::cout, "\n- 开始重生成VIEWS -\n");
 
 
 	std::map<openMVG::IndexT, uint32_t> map_intrinsic, map_view;
@@ -74,7 +71,6 @@ bool exportToSparse(
 	scene.images.reserve(nViews);
 	for (const auto& view : sfm_data.GetViews())
 	{
-		++my_progress_bar;
 		const std::string srcImage = stlplus::create_filespec(sfm_data.s_root_path, view.second->s_Img_path);
 
 		if (!stlplus::is_file(srcImage))
@@ -103,13 +99,11 @@ bool exportToSparse(
 		else
 		{
 
-			std::cout << "Cannot read the corresponding pose or intrinsic of view " << view.first << std::endl;
+			std::cout << "无法读取相应视图的外参或内参" << view.first << std::endl;
 
 		}
 	}
 
-	C_Progress_display my_progress_bar_images(sfm_data.views.size(),
-		std::cout, "\n- 输出镜头畸变矫正后的像片 -\n");
 	std::atomic<bool> bOk(true);
 #ifdef OPENMVG_USE_OPENMP
 	const unsigned int nb_max_thread = (iNumThreads > 0) ? iNumThreads : omp_get_max_threads();
@@ -118,8 +112,6 @@ bool exportToSparse(
 #endif
 	for (int i = 0; i < static_cast<int>(sfm_data.views.size()); ++i)
 	{
-		++my_progress_bar_images;
-
 		if (!bOk)
 			continue;
 
@@ -133,7 +125,6 @@ bool exportToSparse(
 
 		if (sfm_data.IsPoseAndIntrinsicDefined(view))
 		{
-
 			const openMVG::cameras::IntrinsicBase* cam = sfm_data.GetIntrinsics().at(view->id_intrinsic).get();
 			if (cam->have_disto())
 			{
@@ -146,7 +137,8 @@ bool exportToSparse(
 						UndistortImage(imageRGB, cam, imageRGB_ud, BLACK);
 						bOk = WriteImage(imageName.c_str(), imageRGB_ud);
 					}
-					else // If RGBColor reading fails, try to read as gray image
+					else
+					{
 						if (ReadImage(srcImage.c_str(), &image_gray))
 						{
 							UndistortImage(image_gray, cam, image_gray_ud, BLACK);
@@ -157,6 +149,8 @@ bool exportToSparse(
 						{
 							bOk = false;
 						}
+					}
+
 				}
 				catch (const std::bad_alloc& e)
 				{
@@ -165,21 +159,18 @@ bool exportToSparse(
 			}
 			else
 			{
-				// just copy image
 				stlplus::file_copy(srcImage, imageName);
 			}
 		}
 		else
 		{
-			// just copy the image
 			stlplus::file_copy(srcImage, imageName);
 		}
 	}
 
 	if (!bOk)
 	{
-		std::cerr << "内存错误"
-			<< "尝试将线程数调少" << std::endl;
+		std::cerr << "尝试将线程数调少" << std::endl;
 		return false;
 	}
 
@@ -224,7 +215,7 @@ bool exportToSparse(
 			MVS::Interface::Image* pImage(nullptr);
 			for (MVS::Interface::Image& image : scene.images)
 			{
-				if (image.platformID == p && image.cameraID == c && image.poseID != NO_ID)
+				if (image.platformID == p && image.cameraID == c && image.poseID != MVS::NO_ID)
 				{
 					pImage = &image;
 					break;
@@ -258,17 +249,12 @@ int ExportSparseCloud(
 	std::string sSfM_Data_Filename,
 	std::string sOutFile,
 	std::string sOutDir,
-	std::string workDir,
 	int iNumThreads = 0 //only use openmp
 )
 {
-	Global::processProject = SPARSE;
-	Global::processState = 0;
-	Global::saveProcess();
-	if (stlplus::extension_part(sOutFile) != "J3D")
+	if (stlplus::extension_part(sOutFile) != "mvs")
 	{
-		std::cerr << std::endl
-			<< "无效的输出文件扩展名: " << sOutFile << std::endl;
+		std::cerr << "无效的输出文件扩展名: " << sOutFile << std::endl;
 		return EXIT_FAILURE;
 	}
 
@@ -276,39 +262,15 @@ int ExportSparseCloud(
 	SfM_Data sfm_data;
 	if (!Load(sfm_data, sSfM_Data_Filename, ESfM_Data(ALL)))
 	{
-		std::cerr << std::endl
-			<< "输入SfM_Data文件 \"" << sSfM_Data_Filename << "\" 无法读取." << std::endl;
+		std::cerr << "输入SfM_Data文件 \"" << sSfM_Data_Filename << "\" 无法读取." << std::endl;
 		return EXIT_FAILURE;
 	}
 
 	if (!exportToSparse(sfm_data, sOutFile, sOutDir, iNumThreads))
 	{
-		std::cerr << std::endl
-			<< "无法写到文件，请检查权限，或使用管理员身份运行 " << std::endl;
+		std::cerr << "无法写到文件，请检查权限，或使用管理员身份运行 " << std::endl;
 		return EXIT_FAILURE;
 	}
 
-	std::vector<std::string> fileNames;
-	Global::getFiles(workDir.c_str(), fileNames);
-	for (int i = 0; i < fileNames.size(); i++)
-	{
-		std::string& fn = fileNames[i];
-		auto pos = fn.rfind('.');
-		if (pos != fn.npos)
-		{
-			std::string ext = fn.substr(pos + 1, fn.size());
-			if (ext == "feat" || ext == "desc" || ext == "svg" || ext == "html")
-			{
-				remove(fn.c_str());
-			}
-		}
-
-	}
-
-	Global::processState = 100;
-	Global::saveProcess();
 	return EXIT_SUCCESS;
 }
-
-
-

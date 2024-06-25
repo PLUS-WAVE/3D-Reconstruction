@@ -152,8 +152,8 @@ int LoadingImages(
 
 	std::cout
 		<< "输入图片路径:" << InputImagePath << std::endl
-		<< "输出数据路径:" << OutputPath << std::endl
-		<< "相机本征矩阵:" << Kmatrix << std::endl;
+		<< "输出匹配数据路径:" << OutputPath << std::endl
+		<< "相机内参:" << Kmatrix << std::endl;
 
 	if (Kmatrix.size() == 0)
 	{

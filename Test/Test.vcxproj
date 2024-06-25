@@ -23,11 +23,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Image.hpp" />
+    <ClInclude Include="InterfaceMVS.hpp" />
     <ClInclude Include="Match.hpp" />
     <ClInclude Include="SfM.hpp" />
     <ClInclude Include="SfMPlyHelper.hpp" />
     <ClInclude Include="SfP.hpp" />
-    <ClInclude Include="SfMtoMVG.hpp" />
+    <ClInclude Include="Export2MVS.hpp" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
