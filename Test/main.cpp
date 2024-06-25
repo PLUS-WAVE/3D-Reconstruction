@@ -3,6 +3,7 @@
 #include "Match.hpp"
 #include "SfP.hpp"
 #include "Export2MVS.hpp"
+#include "../MVS/openMVS.hpp"
 
 int main()
 {
