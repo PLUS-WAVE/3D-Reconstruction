@@ -35,7 +35,10 @@
     <ClInclude Include="SfP.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="SfMtoMVG.hpp">
+    <ClInclude Include="InterfaceMVS.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Export2MVS.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

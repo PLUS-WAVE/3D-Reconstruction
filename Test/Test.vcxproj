@@ -31,8 +31,8 @@
     <ClInclude Include="Export2MVS.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MVS\MVS.vcxproj">
-      <Project>{91650a4f-fd6f-4bf2-9249-9e172a074cf6}</Project>
+    <ProjectReference Include="..\..\Testtt\Testtt\Testtt.vcxproj">
+      <Project>{d214159e-9759-40d5-8c60-b4d93abeb324}</Project>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
@@ -120,7 +120,7 @@
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;_USE_MATH_DEFINES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
+      <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>../stlplus3;D:/dev/vcpkg/installed/x64-windows/include/openMVG/;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <LanguageStandard>Default</LanguageStandard>
@@ -139,7 +139,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;_USE_MATH_DEFINES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <ConformanceMode>true</ConformanceMode>
+      <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>D:\Code\VS2022\repos\Test\Test\third_party;D:\dev\vcpkg\installed\x64-windows\include\openMVG;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
