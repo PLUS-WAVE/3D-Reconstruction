@@ -5,7 +5,7 @@
 #include "Export2MVS.hpp"
 
 #include <Windows.h>
-#include "D:\Code\VS2022\repos\Testtt\Testtt\MVSEngine.h"
+#include "../MVS/MVSEngine.h"
 
 int main()
 {
@@ -20,7 +20,7 @@ int main()
 	int task = 1;
 	switch (task)
 	{
-	case 0: {
+	case 0:
 		if (!stlplus::folder_exists(resultOutputDir))
 		{
 			if (!stlplus::folder_create(resultOutputDir))
@@ -38,11 +38,11 @@ int main()
 		printf("加载图片成功\n");
 
 		if (GetFeatures(matchesOutputDir + "/sfm_data.json",
-			matchesOutputDir,
-			describerMethod,
-			"",
-			true,
-			false) == EXIT_FAILURE)
+		                matchesOutputDir,
+		                describerMethod,
+		                "",
+		                true,
+		                false) == EXIT_FAILURE)
 		{
 			printf("获取特征信息失败\n");
 			return EXIT_FAILURE;
@@ -108,7 +108,7 @@ int main()
 			<< std::endl;
 
 		StructureFromPoses(
-		sfmOutputDir + "/sfm_data_local.bin",
+			sfmOutputDir + "/sfm_data_local.bin",
 			matchesOutputDir,
 			sfmOutputDir + "/sfp_data.bin",
 			matchesOutputDir + "/matches.f.bin");
@@ -117,13 +117,13 @@ int main()
 		PrintPointColors(sfmOutputDir + "/sfp_data.bin", sfmOutputDir + "/sfp_data_colored.ply");
 
 		printf("\n- Data to MVS -\n");
-		ExportSparseCloud(sfmOutputDir + "/sfp_data.bin", sfmOutputDir + "/scene.mvs", sfmOutputDir + "/undistorted_images");
+		ExportSparseCloud(sfmOutputDir + "/sfp_data.bin", sfmOutputDir + "/scene.mvs",
+		                  sfmOutputDir + "/undistorted_images");
 		printf("\n完成\n");
-	}
-	break;
 
-	case 1: {
+		break;
 
+	case 1:
 		std::string densifyInputDir = "data/c/scene.mvs";
 		std::string densifyWorkingDir = "data/c";
 		std::string densifyOutputDir = "data";
@@ -139,8 +139,8 @@ int main()
 		cmd[5] = "-o";
 		cmd[6] = (char*)densifyOutputDir.data();
 		MVSEngine::DensifyPointCloud(7, cmd);
+
 		break;
-	}
 	}
 
 	return 0;

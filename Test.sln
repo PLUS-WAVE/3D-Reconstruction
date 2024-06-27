@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test\Test.vcxproj",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "3D", "3D", "{4948750E-2821-47F9-BC67-157479579224}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Testtt", "..\Testtt\Testtt\Testtt.vcxproj", "{D214159E-9759-40D5-8C60-B4D93ABEB324}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "MVS", "MVS\MVS.vcxproj", "{D214159E-9759-40D5-8C60-B4D93ABEB324}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
