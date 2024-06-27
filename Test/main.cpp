@@ -17,11 +17,15 @@ int main()
 	std::string EigenMatrix = "2905.88;0;1416;0;2905.88;1064;0;0;1";
 	std::string describerMethod = "AKAZE_FLOAT";
 
-	std::string densifyInputDir = resultOutputDir + "/MVS_Output";
-	std::string densifyWorkingDir = densifyInputDir + "/Densify";
-	std::string densifyOutputDir = densifyInputDir + "/Densify";
+	std::string MVSdensifyInputDir = resultOutputDir + "/MVS_Output";
+	std::string densifyWorkingDir = MVSdensifyInputDir + "/Densify";
+	std::string densifyOutputDir = MVSdensifyInputDir + "/Densify";
 
-	int task = 0;
+	std::string reconstructMeshInputDir = densifyOutputDir;
+	std::string reconstructMeshOutputDir = MVSdensifyInputDir + "/Reconstruction";
+	std::string reconstructMeshWorkingDir = MVSdensifyInputDir + "/Reconstruction";
+
+	int task = 1;
 	switch (task)
 	{
 	case 0:
@@ -120,9 +124,9 @@ int main()
 		printf("\n进行点云上色\n");
 		PrintPointColors(sfmOutputDir + "/sfp_data.bin", sfmOutputDir + "/sfp_data_colored.ply");
 
-		if (!stlplus::folder_exists(densifyInputDir))
+		if (!stlplus::folder_exists(MVSdensifyInputDir))
 		{
-			if (!stlplus::folder_create(densifyInputDir))
+			if (!stlplus::folder_create(MVSdensifyInputDir))
 			{
 				printf("创建文件夹失败\n");
 				return EXIT_FAILURE;
@@ -130,7 +134,7 @@ int main()
 		}
 
 		printf("\n- Data to MVS -\n");
-		Export2MVS(sfmOutputDir + "/sfp_data.bin", densifyInputDir + "/sfm_scene.mvs", densifyInputDir + "/undistorted_images");
+		Export2MVS(sfmOutputDir + "/sfp_data.bin", MVSdensifyInputDir + "/sfm_scene.mvs", MVSdensifyInputDir + "/undistorted_images");
 
 		if (!stlplus::folder_exists(densifyWorkingDir))
 		{
@@ -141,16 +145,16 @@ int main()
 			}
 		}
 
-		stlplus::folder_rename(densifyInputDir + "/undistorted_images", densifyWorkingDir + "/undistorted_images");
+		stlplus::folder_rename(MVSdensifyInputDir + "/undistorted_images", densifyWorkingDir + "/undistorted_images");
 		printf("\n完成\n");
 
-		// break;
+		break;
 
 	case 1:
 		char* cmd[7];
 		char t[200];
 
-		std::string densifyInputFile = densifyInputDir + "/sfm_scene.mvs";
+		std::string densifyInputFile = MVSdensifyInputDir + "/sfm_scene.mvs";
 		std::string densifyOutputFile = densifyOutputDir + "/scene_dense.mvs";
 
 		cmd[0] = t;
@@ -160,7 +164,36 @@ int main()
 		cmd[4] = (char*)densifyWorkingDir.data();
 		cmd[5] = "-o";
 		cmd[6] = (char*)densifyOutputFile.data();
-		MVSEngine::DensifyPointCloud(7, cmd);
+		// MVSEngine::DensifyPointCloud(7, cmd);
+
+
+		if (!stlplus::folder_exists(reconstructMeshWorkingDir))
+		{
+			if (!stlplus::folder_create(reconstructMeshWorkingDir))
+			{
+				printf("创建文件夹失败\n");
+				return EXIT_FAILURE;
+			}
+		}
+
+		stlplus::folder_rename(densifyWorkingDir + "/undistorted_images", reconstructMeshWorkingDir + "/undistorted_images");
+
+		std::string reconstructMeshInputFile = reconstructMeshInputDir + "/scene_dense.mvs";
+		std::string reconstructMeshOutputFile = reconstructMeshOutputDir + "/scene_dense_mesh.mvs";
+
+		char* cmd1[9];
+		char t1[200];
+
+		cmd1[0] = t1;
+		cmd1[1] = "-i";
+		cmd1[2] = (char*)reconstructMeshInputFile.data();
+		cmd1[3] = "-d";
+		cmd1[4] = "2.5";
+		cmd1[5] = "-o";
+		cmd1[6] = (char*)reconstructMeshOutputFile.data();
+		cmd1[7] = "-w";
+		cmd1[8] = (char*)reconstructMeshWorkingDir.data();
+		MVSEngine::ReconstructMesh(9, cmd1);
 
 		break;
 	}

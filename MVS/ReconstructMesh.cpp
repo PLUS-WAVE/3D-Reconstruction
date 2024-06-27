@@ -136,7 +136,7 @@ bool MVSEngine::Initialize_ReconstructMesh(size_t argc, LPCTSTR* argv)
 	Util::ensureValidPath(OPT_ReconstructMesh::strOutputFileName);
 	Util::ensureUnifySlash(OPT_ReconstructMesh::strOutputFileName);
 	if (OPT_ReconstructMesh::strOutputFileName.IsEmpty())
-		OPT_ReconstructMesh::strOutputFileName = Util::getFileFullName(OPT_ReconstructMesh::strInputFileName) + _T("_mesh.J3D");
+		OPT_ReconstructMesh::strOutputFileName = Util::getFileFullName(OPT_ReconstructMesh::strInputFileName) + _T("_mesh.mvs");
 
 	// Initialize_ReconstructMesh global options
 	Process::setCurrentProcessPriority((Process::Priority)OPT_ReconstructMesh::nProcessPriority);
@@ -179,7 +179,7 @@ int MVSEngine::ReconstructMesh(int num, char * cmd[])
 
 	Scene scene(OPT_ReconstructMesh::nMaxThreads);
 	// load project
-	if (!scene.Load(MAKE_PATH_SAFE(OPT_ReconstructMesh::strInputFileName)))
+	if (!scene.Load(OPT_ReconstructMesh::strInputFileName))
 		return EXIT_FAILURE;
 
 	if (OPT_ReconstructMesh::bMeshExport)
@@ -188,7 +188,7 @@ int MVSEngine::ReconstructMesh(int num, char * cmd[])
 		if (scene.mesh.IsEmpty())
 			return EXIT_FAILURE;
 		// save mesh
-		const String fileName(MAKE_PATH_SAFE(OPT_ReconstructMesh::strOutputFileName));
+		const String fileName(OPT_ReconstructMesh::strOutputFileName);
 		scene.mesh.Save(fileName);
 #if TD_VERBOSE != TD_VERBOSE_OFF
 		if (VERBOSITY_LEVEL > 2)
@@ -260,8 +260,8 @@ int MVSEngine::ReconstructMesh(int num, char * cmd[])
 		scene.mesh.Clean(1.f, 0.f, false, 0, 0, true); // extra cleaning to remove non-manifold problems created by closing holes
 
 		// save the final mesh
-		const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT_ReconstructMesh::strOutputFileName)));
-		scene.Save(baseFileName + _T(".J3D"), (ARCHIVE_TYPE)OPT_ReconstructMesh::nArchiveType);
+		const String baseFileName(Util::getFileFullName(OPT_ReconstructMesh::strOutputFileName));
+		scene.Save(baseFileName + _T(".mvs"), (ARCHIVE_TYPE)OPT_ReconstructMesh::nArchiveType);
 		scene.mesh.Save(baseFileName + OPT_ReconstructMesh::strExportType);
 #if TD_VERBOSE != TD_VERBOSE_OFF
 		if (VERBOSITY_LEVEL > 2)
