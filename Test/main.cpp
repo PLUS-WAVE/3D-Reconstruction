@@ -21,9 +21,11 @@ int main()
 	std::string densifyWorkingDir = MVSdensifyInputDir + "/Densify";
 	std::string densifyOutputDir = MVSdensifyInputDir + "/Densify";
 
-	std::string reconstructMeshInputDir = densifyOutputDir;
-	std::string reconstructMeshOutputDir = MVSdensifyInputDir + "/Reconstruction";
-	std::string reconstructMeshWorkingDir = MVSdensifyInputDir + "/Reconstruction";
+	std::string reconstructMeshOutputDir = MVSdensifyInputDir + "/Mesh";
+	std::string reconstructMeshWorkingDir = MVSdensifyInputDir + "/Mesh";
+
+	std::string refineMeshOutputDir = MVSdensifyInputDir + "/RefineMesh";
+	std::string refineMeshWorkingDir = MVSdensifyInputDir + "/RefineMesh";
 
 	int task = 1;
 	switch (task)
@@ -178,7 +180,7 @@ int main()
 
 		stlplus::folder_rename(densifyWorkingDir + "/undistorted_images", reconstructMeshWorkingDir + "/undistorted_images");
 
-		std::string reconstructMeshInputFile = reconstructMeshInputDir + "/scene_dense.mvs";
+		std::string reconstructMeshInputFile = densifyWorkingDir + "/scene_dense.mvs";
 		std::string reconstructMeshOutputFile = reconstructMeshOutputDir + "/scene_dense_mesh.mvs";
 
 		char* cmd1[9];
@@ -193,7 +195,37 @@ int main()
 		cmd1[6] = (char*)reconstructMeshOutputFile.data();
 		cmd1[7] = "-w";
 		cmd1[8] = (char*)reconstructMeshWorkingDir.data();
-		MVSEngine::ReconstructMesh(9, cmd1);
+		// MVSEngine::ReconstructMesh(9, cmd1);
+
+
+		if (!stlplus::folder_exists(refineMeshWorkingDir))
+		{
+			if (!stlplus::folder_create(refineMeshWorkingDir))
+			{
+				printf("创建文件夹失败\n");
+				return EXIT_FAILURE;
+			}
+		}
+
+		stlplus::folder_rename(reconstructMeshWorkingDir + "/undistorted_images", refineMeshWorkingDir + "/undistorted_images");
+
+		std::string refineMeshInputFile = reconstructMeshWorkingDir + "/scene_dense_mesh.mvs";
+		std::string refineMeshOutputFile = refineMeshOutputDir + "/scene_dense_mesh_refine.mvs";
+
+		char* cmd2[9];
+		char t2[200];
+
+		cmd2[0] = t2;
+		cmd2[1] = "-i";
+		cmd2[2] = (char*)refineMeshInputFile.data();
+		cmd2[3] = "--resolution-level";
+		cmd2[4] = "0";
+		cmd2[5] = "-o";
+		cmd2[6] = (char*)refineMeshOutputFile.data();
+		cmd2[7] = "-w";
+		cmd2[8] = (char*)refineMeshWorkingDir.data();
+		MVSEngine::RefineMesh(9, cmd2);
+		
 
 		break;
 	}

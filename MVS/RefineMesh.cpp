@@ -141,7 +141,7 @@ bool MVSEngine::Initialize_RefineMesh(size_t argc, LPCTSTR* argv)
 	Util::ensureValidPath(OPT_RefineMesh::strOutputFileName);
 	Util::ensureUnifySlash(OPT_RefineMesh::strOutputFileName);
 	if (OPT_RefineMesh::strOutputFileName.IsEmpty())
-		OPT_RefineMesh::strOutputFileName = Util::getFileFullName(OPT_RefineMesh::strInputFileName) + _T("_refine.J3D");
+		OPT_RefineMesh::strOutputFileName = Util::getFileFullName(OPT_RefineMesh::strInputFileName) + _T("_refine.mvs");
 
 	Process::setCurrentProcessPriority((Process::Priority)OPT_RefineMesh::nProcessPriority);
 #ifdef _USE_OPENMP
@@ -182,11 +182,11 @@ int MVSEngine::RefineMesh(int num, char* cmd[])
 
 	Scene scene(OPT_RefineMesh::nMaxThreads);
 	// load and refine the coarse mesh
-	if (!scene.Load(MAKE_PATH_SAFE(OPT_RefineMesh::strInputFileName)))
+	if (!scene.Load(OPT_RefineMesh::strInputFileName))
 		return EXIT_FAILURE;
 	if (!OPT_RefineMesh::strMeshFileName.IsEmpty()) {
 		// load given coarse mesh
-		scene.mesh.Load(MAKE_PATH_SAFE(OPT_RefineMesh::strMeshFileName));
+		scene.mesh.Load(OPT_RefineMesh::strMeshFileName);
 	}
 	if (scene.mesh.IsEmpty()) {
 		VERBOSE("error: empty initial mesh");
@@ -217,8 +217,8 @@ int MVSEngine::RefineMesh(int num, char* cmd[])
 	VERBOSE("Mesh refinement completed: %u vertices, %u faces (%s)", scene.mesh.vertices.GetSize(), scene.mesh.faces.GetSize(), TD_TIMER_GET_FMT().c_str());
 
 	// save the final mesh
-	const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT_RefineMesh::strOutputFileName)));
-	scene.Save(baseFileName + _T(".J3D"), (ARCHIVE_TYPE)OPT_RefineMesh::nArchiveType);
+	const String baseFileName(Util::getFileFullName(OPT_RefineMesh::strOutputFileName));
+	scene.Save(baseFileName + _T(".mvs"), (ARCHIVE_TYPE)OPT_RefineMesh::nArchiveType);
 	scene.mesh.Save(baseFileName + OPT_RefineMesh::strExportType);
 #if TD_VERBOSE != TD_VERBOSE_OFF
 	if (VERBOSITY_LEVEL > 2)
