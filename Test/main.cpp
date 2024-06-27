@@ -9,7 +9,7 @@
 
 int main()
 {
-	std::string imagesInputDir = "TestData/Castle";
+	std::string imagesInputDir = "data/Castle";
 	std::string resultOutputDir = imagesInputDir + "/Output";
 	std::string matchesOutputDir = resultOutputDir + "/Describers&Matches";
 	std::string sfmOutputDir = resultOutputDir + "/SfM_Output";
@@ -17,7 +17,11 @@ int main()
 	std::string EigenMatrix = "2905.88;0;1416;0;2905.88;1064;0;0;1";
 	std::string describerMethod = "AKAZE_FLOAT";
 
-	int task = 1;
+	std::string densifyInputDir = resultOutputDir + "/MVS_Output";
+	std::string densifyWorkingDir = densifyInputDir + "/Densify";
+	std::string densifyOutputDir = densifyInputDir + "/Densify";
+
+	int task = 0;
 	switch (task)
 	{
 	case 0:
@@ -116,28 +120,46 @@ int main()
 		printf("\n进行点云上色\n");
 		PrintPointColors(sfmOutputDir + "/sfp_data.bin", sfmOutputDir + "/sfp_data_colored.ply");
 
+		if (!stlplus::folder_exists(densifyInputDir))
+		{
+			if (!stlplus::folder_create(densifyInputDir))
+			{
+				printf("创建文件夹失败\n");
+				return EXIT_FAILURE;
+			}
+		}
+
 		printf("\n- Data to MVS -\n");
-		ExportSparseCloud(sfmOutputDir + "/sfp_data.bin", sfmOutputDir + "/scene.mvs",
-		                  sfmOutputDir + "/undistorted_images");
+		Export2MVS(sfmOutputDir + "/sfp_data.bin", densifyInputDir + "/sfm_scene.mvs", densifyInputDir + "/undistorted_images");
+
+		if (!stlplus::folder_exists(densifyWorkingDir))
+		{
+			if (!stlplus::folder_create(densifyWorkingDir))
+			{
+				printf("创建文件夹失败\n");
+				return EXIT_FAILURE;
+			}
+		}
+
+		stlplus::folder_rename(densifyInputDir + "/undistorted_images", densifyWorkingDir + "/undistorted_images");
 		printf("\n完成\n");
 
-		break;
+		// break;
 
 	case 1:
-		std::string densifyInputDir = "data/c/scene.mvs";
-		std::string densifyWorkingDir = "data/c";
-		std::string densifyOutputDir = "data";
-
 		char* cmd[7];
 		char t[200];
 
+		std::string densifyInputFile = densifyInputDir + "/sfm_scene.mvs";
+		std::string densifyOutputFile = densifyOutputDir + "/scene_dense.mvs";
+
 		cmd[0] = t;
 		cmd[1] = "-i";
-		cmd[2] = (char*)densifyInputDir.data();
+		cmd[2] = (char*)densifyInputFile.data();
 		cmd[3] = "-w";
 		cmd[4] = (char*)densifyWorkingDir.data();
 		cmd[5] = "-o";
-		cmd[6] = (char*)densifyOutputDir.data();
+		cmd[6] = (char*)densifyOutputFile.data();
 		MVSEngine::DensifyPointCloud(7, cmd);
 
 		break;

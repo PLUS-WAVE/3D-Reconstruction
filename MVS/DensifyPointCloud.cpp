@@ -1,10 +1,10 @@
-﻿
-#include "openmvs/MVS/Common.h"
+﻿#include "openmvs/MVS/Common.h"
 #include "openmvs/MVS/Scene.h"
 #include <boost/program_options.hpp>
 #include "MVSEngine.h"
 #include <direct.h>
 #include <cstdio>
+
 using namespace MVS;
 #define APPNAME _T("DensifyPointCloud")
 namespace OPT {
@@ -250,7 +250,7 @@ int MVSEngine::DensifyPointCloud(int num, char* cmd[])
 	Scene scene(OPT::nMaxThreads);
 	if (OPT::fSampleMesh != 0) {
 		// sample input mesh and export the obtained point-cloud
-		if (!scene.mesh.Load(MAKE_PATH_SAFE(OPT::strInputFileName)))
+		if (!scene.mesh.Load(OPT::strInputFileName))
 		{
 
 			return EXIT_FAILURE;
@@ -263,7 +263,7 @@ int MVSEngine::DensifyPointCloud(int num, char* cmd[])
 		else
 			scene.mesh.SamplePoints((unsigned)ROUND2INT(-OPT::fSampleMesh), pointcloud);
 		VERBOSE("网格重建完成: %u points (%s)", pointcloud.GetSize(), TD_TIMER_GET_FMT().c_str());
-		pointcloud.Save(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName)) + _T(".ply"));
+		pointcloud.Save(Util::getFileFullName(OPT::strOutputFileName) + _T(".ply"));
 		MVSEngine::Finalize_Dense();
 		cleanCacheFiles(cmd[4]);
 		return EXIT_SUCCESS;
@@ -281,7 +281,7 @@ int MVSEngine::DensifyPointCloud(int num, char* cmd[])
 	if (OPT::thFilterPointCloud < 0) {
 		// filter point-cloud based on camera-point visibility intersections
 		scene.PointCloudFilter(OPT::thFilterPointCloud);
-		const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName)) + _T("_filtered"));
+		const String baseFileName(Util::getFileFullName(OPT::strOutputFileName) + _T("_filtered"));
 		scene.Save(baseFileName + _T(".mvs"), (ARCHIVE_TYPE)OPT::nArchiveType);
 		scene.pointcloud.Save(baseFileName + _T(".ply"));
 		MVSEngine::Finalize_Dense();
@@ -306,7 +306,7 @@ int MVSEngine::DensifyPointCloud(int num, char* cmd[])
 	}
 
 	// save the final mesh
-	const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT::strOutputFileName)));
+	const String baseFileName(Util::getFileFullName(OPT::strOutputFileName));
 	scene.Save(baseFileName + _T(".mvs"), (ARCHIVE_TYPE)OPT::nArchiveType);
 	scene.pointcloud.Save(baseFileName + _T(".ply"));
 
