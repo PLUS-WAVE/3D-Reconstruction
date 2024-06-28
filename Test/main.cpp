@@ -7,27 +7,36 @@
 #include <Windows.h>
 #include "../MVS/MVSEngine.h"
 
-int main()
+int main(int argc, char* argv[])
 {
-	std::string imagesInputDir = "data/Castle";
+
+	// 检查命令行参数数量
+	if (argc < 3) {
+		std::cerr << "Usage: " << argv[0] << " <imagesInputDir> <kmatrix>" << std::endl;
+		return EXIT_FAILURE;
+	}
+
+	// 计算时间
+	clock_t start, end;
+	start = clock();
+
+	// std::string imagesInputDir = "data/Castle";
+	std::string imagesInputDir = argv[1];
 	std::string resultOutputDir = imagesInputDir + "/Output";
 	std::string matchesOutputDir = resultOutputDir + "/Describers&Matches";
 	std::string sfmOutputDir = resultOutputDir + "/SfM_Output";
 
-	std::string EigenMatrix = "2905.88;0;1416;0;2905.88;1064;0;0;1";
+	std::string kmatrix = argv[2];
+
 	std::string describerMethod = "AKAZE_FLOAT";
 
-	std::string MVSdensifyInputDir = resultOutputDir + "/MVS_Output";
-	std::string densifyWorkingDir = MVSdensifyInputDir + "/Densify";
-	std::string densifyOutputDir = MVSdensifyInputDir + "/Densify";
+	std::string MVSOutputDir = resultOutputDir + "/MVS_Output";
+	std::string densifyOutputDir = MVSOutputDir + "/Densify";
+	std::string reconstructMeshOutputDir = MVSOutputDir + "/Mesh";
+	std::string refineMeshOutputDir = MVSOutputDir + "/RefineMesh";
+	std::string textureMeshOutputDir = MVSOutputDir + "/TextureMesh";
 
-	std::string reconstructMeshOutputDir = MVSdensifyInputDir + "/Mesh";
-	std::string reconstructMeshWorkingDir = MVSdensifyInputDir + "/Mesh";
-
-	std::string refineMeshOutputDir = MVSdensifyInputDir + "/RefineMesh";
-	std::string refineMeshWorkingDir = MVSdensifyInputDir + "/RefineMesh";
-
-	int task = 1;
+	int task = 0;
 	switch (task)
 	{
 	case 0:
@@ -40,7 +49,7 @@ int main()
 			}
 		}
 
-		if (LoadingImages(imagesInputDir, matchesOutputDir, EigenMatrix) == EXIT_FAILURE)
+		if (LoadingImages(imagesInputDir, matchesOutputDir, kmatrix) == EXIT_FAILURE)
 		{
 			printf("加载图片失败\n");
 			return EXIT_FAILURE;
@@ -126,9 +135,9 @@ int main()
 		printf("\n进行点云上色\n");
 		PrintPointColors(sfmOutputDir + "/sfp_data.bin", sfmOutputDir + "/sfp_data_colored.ply");
 
-		if (!stlplus::folder_exists(MVSdensifyInputDir))
+		if (!stlplus::folder_exists(MVSOutputDir))
 		{
-			if (!stlplus::folder_create(MVSdensifyInputDir))
+			if (!stlplus::folder_create(MVSOutputDir))
 			{
 				printf("创建文件夹失败\n");
 				return EXIT_FAILURE;
@@ -136,51 +145,52 @@ int main()
 		}
 
 		printf("\n- Data to MVS -\n");
-		Export2MVS(sfmOutputDir + "/sfp_data.bin", MVSdensifyInputDir + "/sfm_scene.mvs", MVSdensifyInputDir + "/undistorted_images");
+		Export2MVS(sfmOutputDir + "/sfp_data.bin", MVSOutputDir + "/sfm_scene.mvs", MVSOutputDir + "/undistorted_images");
 
-		if (!stlplus::folder_exists(densifyWorkingDir))
+		printf("\n完成\n");
+
+		// break;
+
+	case 1:
+		if (!stlplus::folder_exists(densifyOutputDir))
 		{
-			if (!stlplus::folder_create(densifyWorkingDir))
+			if (!stlplus::folder_create(densifyOutputDir))
 			{
 				printf("创建文件夹失败\n");
 				return EXIT_FAILURE;
 			}
 		}
 
-		stlplus::folder_rename(MVSdensifyInputDir + "/undistorted_images", densifyWorkingDir + "/undistorted_images");
-		printf("\n完成\n");
+		stlplus::folder_rename(MVSOutputDir + "/undistorted_images", densifyOutputDir + "/undistorted_images");
 
-		break;
+		std::string densifyInputFile = MVSOutputDir + "/sfm_scene.mvs";
+		std::string densifyOutputFile = densifyOutputDir + "/scene_dense.mvs";
 
-	case 1:
 		char* cmd[7];
 		char t[200];
-
-		std::string densifyInputFile = MVSdensifyInputDir + "/sfm_scene.mvs";
-		std::string densifyOutputFile = densifyOutputDir + "/scene_dense.mvs";
 
 		cmd[0] = t;
 		cmd[1] = "-i";
 		cmd[2] = (char*)densifyInputFile.data();
 		cmd[3] = "-w";
-		cmd[4] = (char*)densifyWorkingDir.data();
+		cmd[4] = (char*)densifyOutputDir.data();
 		cmd[5] = "-o";
 		cmd[6] = (char*)densifyOutputFile.data();
-		// MVSEngine::DensifyPointCloud(7, cmd);
+		MVSEngine::DensifyPointCloud(7, cmd);
 
 
-		if (!stlplus::folder_exists(reconstructMeshWorkingDir))
+		if (!stlplus::folder_exists(reconstructMeshOutputDir))
 		{
-			if (!stlplus::folder_create(reconstructMeshWorkingDir))
+			if (!stlplus::folder_create(reconstructMeshOutputDir))
 			{
 				printf("创建文件夹失败\n");
 				return EXIT_FAILURE;
 			}
 		}
 
-		stlplus::folder_rename(densifyWorkingDir + "/undistorted_images", reconstructMeshWorkingDir + "/undistorted_images");
+		stlplus::folder_rename(densifyOutputDir + "/undistorted_images", reconstructMeshOutputDir + "/undistorted_images");
 
-		std::string reconstructMeshInputFile = densifyWorkingDir + "/scene_dense.mvs";
+		std::string reconstructMeshInputFile = densifyOutputDir + "/scene_dense.mvs";
 		std::string reconstructMeshOutputFile = reconstructMeshOutputDir + "/scene_dense_mesh.mvs";
 
 		char* cmd1[9];
@@ -194,22 +204,22 @@ int main()
 		cmd1[5] = "-o";
 		cmd1[6] = (char*)reconstructMeshOutputFile.data();
 		cmd1[7] = "-w";
-		cmd1[8] = (char*)reconstructMeshWorkingDir.data();
-		// MVSEngine::ReconstructMesh(9, cmd1);
+		cmd1[8] = (char*)reconstructMeshOutputDir.data();
+		MVSEngine::ReconstructMesh(9, cmd1);
 
 
-		if (!stlplus::folder_exists(refineMeshWorkingDir))
+		if (!stlplus::folder_exists(refineMeshOutputDir))
 		{
-			if (!stlplus::folder_create(refineMeshWorkingDir))
+			if (!stlplus::folder_create(refineMeshOutputDir))
 			{
 				printf("创建文件夹失败\n");
 				return EXIT_FAILURE;
 			}
 		}
 
-		stlplus::folder_rename(reconstructMeshWorkingDir + "/undistorted_images", refineMeshWorkingDir + "/undistorted_images");
+		stlplus::folder_rename(reconstructMeshOutputDir + "/undistorted_images", refineMeshOutputDir + "/undistorted_images");
 
-		std::string refineMeshInputFile = reconstructMeshWorkingDir + "/scene_dense_mesh.mvs";
+		std::string refineMeshInputFile = reconstructMeshOutputDir + "/scene_dense_mesh.mvs";
 		std::string refineMeshOutputFile = refineMeshOutputDir + "/scene_dense_mesh_refine.mvs";
 
 		char* cmd2[9];
@@ -223,12 +233,47 @@ int main()
 		cmd2[5] = "-o";
 		cmd2[6] = (char*)refineMeshOutputFile.data();
 		cmd2[7] = "-w";
-		cmd2[8] = (char*)refineMeshWorkingDir.data();
+		cmd2[8] = (char*)refineMeshOutputDir.data();
 		MVSEngine::RefineMesh(9, cmd2);
-		
+
+
+		if (!stlplus::folder_exists(textureMeshOutputDir))
+		{
+			if (!stlplus::folder_create(textureMeshOutputDir))
+			{
+				printf("创建文件夹失败\n");
+				return EXIT_FAILURE;
+			}
+		}
+
+		stlplus::folder_rename(refineMeshOutputDir + "/undistorted_images", textureMeshOutputDir + "/undistorted_images");
+
+		std::string textureMeshInputFile = refineMeshOutputDir + "/scene_dense_mesh_refine.mvs";
+		std::string textureMeshOutputFile = textureMeshOutputDir + "/scene_dense_mesh_refine_texture.mvs";
+
+		std::string exportFormat = "obj";
+
+		char* cmd3[9];
+		char t3[200];
+
+		cmd3[0] = t3;
+		cmd3[1] = "-i";
+		cmd3[2] = (char*)textureMeshInputFile.data();
+		cmd3[3] = "-o";
+		cmd3[4] = (char*)textureMeshOutputFile.data();
+		cmd3[5] = "-w";
+		cmd3[6] = (char*)textureMeshOutputDir.data();
+		cmd3[7] = "--export-type";
+		cmd3[8] = (char*)exportFormat.data();
+		MVSEngine::TextureMesh(9, cmd3);
 
 		break;
 	}
+
+	// 需要测试运行时间的程序段
+	end = clock();
+
+	std::cout << "Time: " << (double)(end - start) / CLOCKS_PER_SEC << "s" << std::endl;
 
 	return 0;
 }

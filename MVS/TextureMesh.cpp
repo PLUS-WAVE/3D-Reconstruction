@@ -131,7 +131,7 @@ bool MVSEngine::Initialize_TextureMesh(size_t argc, LPCTSTR* argv)
 	Util::ensureValidPath(OPT_TextureMesh::strOutputFileName);
 	Util::ensureUnifySlash(OPT_TextureMesh::strOutputFileName);
 	if (OPT_TextureMesh::strOutputFileName.IsEmpty())
-		OPT_TextureMesh::strOutputFileName = Util::getFileFullName(OPT_TextureMesh::strInputFileName) + _T("_texture.J3D");
+		OPT_TextureMesh::strOutputFileName = Util::getFileFullName(OPT_TextureMesh::strInputFileName) + _T("_texture.mvs");
 
 	Process::setCurrentProcessPriority((Process::Priority)OPT_TextureMesh::nProcessPriority);
 #ifdef _USE_OPENMP
@@ -169,17 +169,17 @@ int MVSEngine::TextureMesh(int num, char* cmd[])
 
 	Scene scene(OPT_TextureMesh::nMaxThreads);
 	// load and texture the mesh
-	if (!scene.Load(MAKE_PATH_SAFE(OPT_TextureMesh::strInputFileName)))
+	if (!scene.Load(OPT_TextureMesh::strInputFileName))
 		return EXIT_FAILURE;
 	if (!OPT_TextureMesh::strMeshFileName.IsEmpty()) {
 		// load given mesh
-		scene.mesh.Load(MAKE_PATH_SAFE(OPT_TextureMesh::strMeshFileName));
+		scene.mesh.Load(OPT_TextureMesh::strMeshFileName);
 	}
 	if (scene.mesh.IsEmpty()) {
 		VERBOSE("error: empty initial mesh");
 		return EXIT_FAILURE;
 	}
-	const String baseFileName(MAKE_PATH_SAFE(Util::getFileFullName(OPT_TextureMesh::strOutputFileName)));
+	const String baseFileName(Util::getFileFullName(OPT_TextureMesh::strOutputFileName));
 	if (OPT_TextureMesh::nOrthoMapResolution && !scene.mesh.textureDiffuse.empty()) {
 		goto ProjectOrtho;
 	}
@@ -198,11 +198,20 @@ int MVSEngine::TextureMesh(int num, char* cmd[])
 
 
 		TD_TIMER_START();
-		if (!scene.TextureMesh(OPT_TextureMesh::nResolutionLevel, OPT_TextureMesh::nMinResolution, OPT_TextureMesh::fOutlierThreshold, OPT_TextureMesh::fRatioDataSmoothness, OPT_TextureMesh::bGlobalSeamLeveling, OPT_TextureMesh::bLocalSeamLeveling, OPT_TextureMesh::nTextureSizeMultiple, OPT_TextureMesh::nRectPackingHeuristic, OPT_TextureMesh::nColEmpty))
+		if (!scene.TextureMesh(
+			OPT_TextureMesh::nResolutionLevel,
+			OPT_TextureMesh::nMinResolution,
+			0,
+			OPT_TextureMesh::fOutlierThreshold, 
+			OPT_TextureMesh::fRatioDataSmoothness, 
+			OPT_TextureMesh::bGlobalSeamLeveling, 
+			OPT_TextureMesh::bLocalSeamLeveling, 
+			OPT_TextureMesh::nTextureSizeMultiple, 
+			OPT_TextureMesh::nRectPackingHeuristic))
 			return EXIT_FAILURE;
 		VERBOSE("Mesh texturing completed: %u vertices, %u faces (%s)", scene.mesh.vertices.GetSize(), scene.mesh.faces.GetSize(), TD_TIMER_GET_FMT().c_str());
 
-		scene.Save(baseFileName + _T(".J3D"), (ARCHIVE_TYPE)OPT_TextureMesh::nArchiveType);
+		scene.Save(baseFileName + _T(".mvs"), (ARCHIVE_TYPE)OPT_TextureMesh::nArchiveType);
 		scene.mesh.Save(baseFileName + OPT_TextureMesh::strExportType);
 #if TD_VERBOSE != TD_VERBOSE_OFF
 		if (VERBOSITY_LEVEL > 2)
