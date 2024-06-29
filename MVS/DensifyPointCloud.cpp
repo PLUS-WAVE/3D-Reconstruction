@@ -1,7 +1,7 @@
 ﻿#include "openmvs/MVS/Common.h"
 #include "openmvs/MVS/Scene.h"
 #include <boost/program_options.hpp>
-#include "MVSEngine.h"
+#include "MVSUSE.h"
 #include <direct.h>
 #include <cstdio>
 
@@ -12,8 +12,6 @@ namespace OPT {
 	String strOutputFileName;
 	String strMeshFileName;
 	String strDenseConfigFileName;
-	float fSampleMesh;
-	int thFilterPointCloud;
 	int nFusionMode;
 	int nArchiveType;
 	int nProcessPriority;
@@ -42,7 +40,6 @@ int getFiles(const char* path, std::vector<std::string>& arr)
 			}
 			else
 			{
-
 				strcpy(buf, path);
 				strcat(buf, "\\");
 				strcat(buf, fileinfo.name);
@@ -58,9 +55,8 @@ int getFiles(const char* path, std::vector<std::string>& arr)
 
 
 // Initialize_Dense and parse the command line parameters
-bool MVSEngine::Initialize_Dense(size_t argc, LPCTSTR* argv)
+bool Initialize_Dense(size_t argc, LPCTSTR* argv)
 {
-
 	// Initialize_Dense log and console
 	CLOSE_LOGFILE();
 	CLOSE_LOGCONSOLE();
@@ -109,8 +105,8 @@ bool MVSEngine::Initialize_Dense(size_t argc, LPCTSTR* argv)
 		("optimize", boost::program_options::value(&nOptimize)->default_value(7), "filter used after depth-map estimation (0 - disabled, 1 - remove speckles, 2 - fill gaps, 4 - cross-adjust)")
 		("estimate-colors", boost::program_options::value(&nEstimateColors)->default_value(2), "estimate the colors for the dense point-cloud")
 		("estimate-normals", boost::program_options::value(&nEstimateNormals)->default_value(0), "estimate the normals for the dense point-cloud")
-		("sample-mesh", boost::program_options::value(&OPT::fSampleMesh)->default_value(0.f), "uniformly samples points on a mesh (0 - disabled, <0 - number of points, >0 - sample density per square unit)")
-		("filter-point-cloud", boost::program_options::value(&OPT::thFilterPointCloud)->default_value(0), "filter dense point-cloud based on visibility (0 - disabled)")
+		// ("sample-mesh", boost::program_options::value(&OPT::fSampleMesh)->default_value(0.f), "uniformly samples points on a mesh (0 - disabled, <0 - number of points, >0 - sample density per square unit)")
+		// ("filter-point-cloud", boost::program_options::value(&OPT::thFilterPointCloud)->default_value(0), "filter dense point-cloud based on visibility (0 - disabled)")
 		("fusion-mode", boost::program_options::value(&OPT::nFusionMode)->default_value(0), "depth map fusion mode (-2 - fuse disparity-maps, -1 - export disparity-maps only, 0 - depth-maps & fusion, 1 - export depth-maps only)")
 		;
 
@@ -150,10 +146,6 @@ bool MVSEngine::Initialize_Dense(size_t argc, LPCTSTR* argv)
 	// Initialize_Dense the log file
 	OPEN_LOGFILE(MAKE_PATH(APPNAME _T("-") + Util::getUniqueName(0) + _T(".log")).c_str());
 
-	// print application details: version and command line
-	//Util::LogBuild();
-	//LOG(_T("Command line:%s"), Util::CommandLineToString(argc, argv).c_str());
-
 	// validate input
 	Util::ensureValidPath(OPT::strInputFileName);
 	Util::ensureUnifySlash(OPT::strInputFileName);
@@ -169,11 +161,9 @@ bool MVSEngine::Initialize_Dense(size_t argc, LPCTSTR* argv)
 	Util::ensureValidPath(OPT::strOutputFileName);
 	Util::ensureUnifySlash(OPT::strOutputFileName);
 	if (OPT::strOutputFileName.IsEmpty())
-		OPT::strOutputFileName = Util::getFileFullName(OPT::strInputFileName) + _T("_dense.J3D");
+		OPT::strOutputFileName = Util::getFileFullName(OPT::strInputFileName) + _T("_dense.mvs");
 
 	// init dense options
-	if (!OPT::strDenseConfigFileName.IsEmpty())
-		OPT::strDenseConfigFileName = MAKE_PATH_SAFE(OPT::strDenseConfigFileName);
 	OPTDENSE::init();
 	const bool bValidConfig(OPTDENSE::oConfig.Load(OPT::strDenseConfigFileName));
 	OPTDENSE::update();
@@ -195,17 +185,12 @@ bool MVSEngine::Initialize_Dense(size_t argc, LPCTSTR* argv)
 		omp_set_num_threads(OPT::nMaxThreads);
 #endif
 
-#ifdef _USE_BREAKPAD
-	// start memory dumper
-	MiniDumper::Create(APPNAME, WORKING_FOLDER);
-#endif
-
 	Util::Init();
 	return true;
 }
 
 // Finalize_Dense application instance
-void MVSEngine::Finalize_Dense()
+void Finalize_Dense()
 {
 #if TD_VERBOSE != TD_VERBOSE_OFF
 	// print memory statistics
@@ -232,93 +217,43 @@ void cleanCacheFiles(const std::string& workDir)
 
 	}
 }
-int MVSEngine::DensifyPointCloud(int num, char* cmd[])
+
+int MVSUSE::DensifyPointCloud(int agrs_num, const char* d_agrs[])
 {
-	int argc = num;
-	LPCTSTR* argv = (LPCTSTR*)cmd;
-#ifdef _DEBUGINFO
-	// set _crtBreakAlloc index to stop in <dbgheap.c> at allocation
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);// | _CRTDBG_CHECK_ALWAYS_DF);
-#endif
-
-	if (!MVSEngine::Initialize_Dense(argc, argv))
+	if (!Initialize_Dense(agrs_num, d_agrs))
 	{
-
 		return EXIT_FAILURE;
 	}
 
 	Scene scene(OPT::nMaxThreads);
-	if (OPT::fSampleMesh != 0) {
-		// sample input mesh and export the obtained point-cloud
-		if (!scene.mesh.Load(OPT::strInputFileName))
-		{
 
-			return EXIT_FAILURE;
-		}
-
-		TD_TIMER_START();
-		PointCloud pointcloud;
-		if (OPT::fSampleMesh > 0)
-			scene.mesh.SamplePoints(OPT::fSampleMesh, 0, pointcloud);
-		else
-			scene.mesh.SamplePoints((unsigned)ROUND2INT(-OPT::fSampleMesh), pointcloud);
-		VERBOSE("网格重建完成: %u points (%s)", pointcloud.GetSize(), TD_TIMER_GET_FMT().c_str());
-		pointcloud.Save(Util::getFileFullName(OPT::strOutputFileName) + _T(".ply"));
-		MVSEngine::Finalize_Dense();
-		cleanCacheFiles(cmd[4]);
-		return EXIT_SUCCESS;
-	}
 	// load and estimate a dense point-cloud
 	if (!scene.Load(OPT::strInputFileName))
 	{
+		VERBOSE("error: failed to load input scene");
 		return EXIT_FAILURE;
 	}
 	if (scene.pointcloud.IsEmpty()) {
 		VERBOSE("error: empty initial point-cloud");
-
 		return EXIT_FAILURE;
 	}
-	if (OPT::thFilterPointCloud < 0) {
-		// filter point-cloud based on camera-point visibility intersections
-		scene.PointCloudFilter(OPT::thFilterPointCloud);
-		const String baseFileName(Util::getFileFullName(OPT::strOutputFileName) + _T("_filtered"));
-		scene.Save(baseFileName + _T(".mvs"), (ARCHIVE_TYPE)OPT::nArchiveType);
-		scene.pointcloud.Save(baseFileName + _T(".ply"));
-		MVSEngine::Finalize_Dense();
-		cleanCacheFiles(cmd[4]);
-		return EXIT_SUCCESS;
-	}
+
 	if ((ARCHIVE_TYPE)OPT::nArchiveType != ARCHIVE_MVS) {
 		TD_TIMER_START();
-		if (!scene.DenseReconstruction(OPT::nFusionMode)) {
-			if (ABS(OPT::nFusionMode) != 1)
-			{
-
-				return EXIT_FAILURE;
-			}
-
-			VERBOSE("深度图估计中 (%s)", TD_TIMER_GET_FMT().c_str());
-			MVSEngine::Finalize_Dense();
-			cleanCacheFiles(cmd[4]);
-			return EXIT_SUCCESS;
+		if (!scene.DenseReconstruction(OPT::nFusionMode)) 
+		{
+			VERBOSE("error: dense reconstruction failed");
+			return EXIT_FAILURE;
 		}
-		VERBOSE("密集点云生成完成: %u points (%s)", scene.pointcloud.GetSize(), TD_TIMER_GET_FMT().c_str());
+		VERBOSE("稠密点云生成完成: %u points (%s)", scene.pointcloud.GetSize(), TD_TIMER_GET_FMT().c_str());
 	}
 
-	// save the final mesh
+	// save the final result
 	const String baseFileName(Util::getFileFullName(OPT::strOutputFileName));
 	scene.Save(baseFileName + _T(".mvs"), (ARCHIVE_TYPE)OPT::nArchiveType);
 	scene.pointcloud.Save(baseFileName + _T(".ply"));
 
-
-
-
-#if TD_VERBOSE != TD_VERBOSE_OFF
-	if (VERBOSITY_LEVEL > 2)
-		scene.ExportCamerasMLP(baseFileName + _T(".mlp"), baseFileName + _T(".ply"));
-#endif
-
-	MVSEngine::Finalize_Dense();
-	cleanCacheFiles(cmd[4]);
+	Finalize_Dense();
+	cleanCacheFiles(d_agrs[4]);
 	return EXIT_SUCCESS;
 }

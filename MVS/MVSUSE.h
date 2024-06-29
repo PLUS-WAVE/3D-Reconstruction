@@ -1,11 +1,8 @@
 #pragma once
-#include <vector>
-#include <io.h>
-namespace MVSEngine
+
+namespace MVSUSE
 {
-	bool Initialize_Dense(size_t argc, LPCTSTR* argv);
-	void Finalize_Dense();
-	__declspec(dllexport) int DensifyPointCloud(int num, char* cmd[]);
+	__declspec(dllexport) int DensifyPointCloud(int agrs_num, const char* d_agrs[]);
 
 	bool Initialize_ReconstructMesh(size_t argc, LPCTSTR* argv);
 	void Finalize_ReconstructMesh();

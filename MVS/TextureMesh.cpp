@@ -1,7 +1,7 @@
 #include "openmvs/MVS/Common.h"
 #include "openmvs/MVS/Scene.h"
 #include <boost/program_options.hpp>
-#include "MVSEngine.h"
+#include "MVSUSE.h"
 using namespace MVS;
 #define APPNAME _T("TextureMesh")
 namespace OPT_TextureMesh {
@@ -29,7 +29,7 @@ namespace OPT_TextureMesh {
 } // namespace OPT_TextureMesh
 
 // Initialize_TextureMesh and parse the command line parameters
-bool MVSEngine::Initialize_TextureMesh(size_t argc, LPCTSTR* argv)
+bool MVSUSE::Initialize_TextureMesh(size_t argc, LPCTSTR* argv)
 {
 	// Initialize_Dense log and console
 	CLOSE_LOGFILE();
@@ -148,7 +148,7 @@ bool MVSEngine::Initialize_TextureMesh(size_t argc, LPCTSTR* argv)
 	return true;
 }
 
-void MVSEngine::Finalize_TextureMesh()
+void MVSUSE::Finalize_TextureMesh()
 {
 #if TD_VERBOSE != TD_VERBOSE_OFF
 	// print memory statistics
@@ -157,7 +157,7 @@ void MVSEngine::Finalize_TextureMesh()
 
 }
 
-int MVSEngine::TextureMesh(int num, char* cmd[])
+int MVSUSE::TextureMesh(int num, char* cmd[])
 {
 #ifdef _DEBUGINFO
 	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);// | _CRTDBG_CHECK_ALWAYS_DF);

@@ -1,7 +1,7 @@
 #include "openmvs/MVS/Common.h"
 #include "openmvs/MVS/Scene.h"
 #include <boost/program_options.hpp>
-#include "MVSEngine.h"
+#include "MVSUSE.h"
 using namespace MVS;
 #define APPNAME _T("RefineMesh")
 
@@ -36,7 +36,7 @@ namespace OPT_RefineMesh {
 } // namespace OPT_RefineMesh
 
 
-bool MVSEngine::Initialize_RefineMesh(size_t argc, LPCTSTR* argv)
+bool MVSUSE::Initialize_RefineMesh(size_t argc, LPCTSTR* argv)
 {
 	// Initialize_Dense log and console
 	CLOSE_LOGFILE();
@@ -159,7 +159,7 @@ bool MVSEngine::Initialize_RefineMesh(size_t argc, LPCTSTR* argv)
 }
 
 // Finalize_RefineMesh application instance
-void MVSEngine::Finalize_RefineMesh()
+void MVSUSE::Finalize_RefineMesh()
 {
 #if TD_VERBOSE != TD_VERBOSE_OFF
 	// print memory statistics
@@ -168,7 +168,7 @@ void MVSEngine::Finalize_RefineMesh()
 
 }
 
-int MVSEngine::RefineMesh(int num, char* cmd[])
+int MVSUSE::RefineMesh(int num, char* cmd[])
 {
 #ifdef _DEBUGINFO
 	// set _crtBreakAlloc index to stop in <dbgheap.c> at allocation

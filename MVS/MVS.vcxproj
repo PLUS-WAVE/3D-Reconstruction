@@ -165,7 +165,7 @@
     <ClCompile Include="TextureMesh.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MVSEngine.h" />
+    <ClInclude Include="MVSUSE.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

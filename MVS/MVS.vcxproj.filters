@@ -29,7 +29,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="MVSEngine.h">
+    <ClInclude Include="MVSUSE.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>

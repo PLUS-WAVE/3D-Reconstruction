@@ -5,7 +5,7 @@
 #include "Export2MVS.hpp"
 
 #include <Windows.h>
-#include "../MVS/MVSEngine.h"
+#include "../MVS/MVSUSE.h"
 
 int main(int argc, char* argv[])
 {
@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
 	std::string refineMeshOutputDir = MVSOutputDir + "/RefineMesh";
 	std::string textureMeshOutputDir = MVSOutputDir + "/TextureMesh";
 
-	int task = 0;
+	int task = 1;
 	switch (task)
 	{
 	case 0:
@@ -152,6 +152,12 @@ int main(int argc, char* argv[])
 		// break;
 
 	case 1:
+		std::cout
+			<< "\n-----------------------------------------------------------"
+			<< "\n Densify Point Cloud:"
+			<< "\n-----------------------------------------------------------"
+			<< std::endl;
+
 		if (!stlplus::folder_exists(densifyOutputDir))
 		{
 			if (!stlplus::folder_create(densifyOutputDir))
@@ -166,18 +172,23 @@ int main(int argc, char* argv[])
 		std::string densifyInputFile = MVSOutputDir + "/sfm_scene.mvs";
 		std::string densifyOutputFile = densifyOutputDir + "/scene_dense.mvs";
 
-		char* cmd[7];
-		char t[200];
+		const char* d_args[9];
 
-		cmd[0] = t;
-		cmd[1] = "-i";
-		cmd[2] = (char*)densifyInputFile.data();
-		cmd[3] = "-w";
-		cmd[4] = (char*)densifyOutputDir.data();
-		cmd[5] = "-o";
-		cmd[6] = (char*)densifyOutputFile.data();
-		MVSEngine::DensifyPointCloud(7, cmd);
+		d_args[1] = "-i";
+		d_args[2] = (char*)densifyInputFile.data();
+		d_args[3] = "-w";
+		d_args[4] = (char*)densifyOutputDir.data();
+		d_args[5] = "-o";
+		d_args[6] = (char*)densifyOutputFile.data();
+		d_args[7] = "--max-threads";
+		d_args[8] = "16";
+		MVSUSE::DensifyPointCloud(9, d_args);
 
+		std::cout
+			<< "\n-----------------------------------------------------------"
+			<< "\n Reconstruct Mesh:"
+			<< "\n-----------------------------------------------------------"
+			<< std::endl;
 
 		if (!stlplus::folder_exists(reconstructMeshOutputDir))
 		{
@@ -205,7 +216,7 @@ int main(int argc, char* argv[])
 		cmd1[6] = (char*)reconstructMeshOutputFile.data();
 		cmd1[7] = "-w";
 		cmd1[8] = (char*)reconstructMeshOutputDir.data();
-		MVSEngine::ReconstructMesh(9, cmd1);
+		MVSUSE::ReconstructMesh(9, cmd1);
 
 
 		if (!stlplus::folder_exists(refineMeshOutputDir))
@@ -234,7 +245,7 @@ int main(int argc, char* argv[])
 		cmd2[6] = (char*)refineMeshOutputFile.data();
 		cmd2[7] = "-w";
 		cmd2[8] = (char*)refineMeshOutputDir.data();
-		MVSEngine::RefineMesh(9, cmd2);
+		MVSUSE::RefineMesh(9, cmd2);
 
 
 		if (!stlplus::folder_exists(textureMeshOutputDir))
@@ -265,12 +276,11 @@ int main(int argc, char* argv[])
 		cmd3[6] = (char*)textureMeshOutputDir.data();
 		cmd3[7] = "--export-type";
 		cmd3[8] = (char*)exportFormat.data();
-		MVSEngine::TextureMesh(9, cmd3);
+		MVSUSE::TextureMesh(9, cmd3);
 
 		break;
 	}
 
-	// 需要测试运行时间的程序段
 	end = clock();
 
 	std::cout << "Time: " << (double)(end - start) / CLOCKS_PER_SEC << "s" << std::endl;

@@ -1,7 +1,7 @@
 #include "openmvs/MVS/Common.h"
 #include "openmvs/MVS/Scene.h"
 #include <boost/program_options.hpp>
-#include "MVSEngine.h"
+#include "MVSUSE.h"
 
 using namespace MVS;
 #define APPNAME _T("ReconstructMesh")
@@ -33,7 +33,7 @@ namespace OPT_ReconstructMesh {
 	boost::program_options::variables_map vm;
 }
 
-bool MVSEngine::Initialize_ReconstructMesh(size_t argc, LPCTSTR* argv)
+bool MVSUSE::Initialize_ReconstructMesh(size_t argc, LPCTSTR* argv)
 {
 	// Initialize_Dense log and console
 	CLOSE_LOGFILE();
@@ -154,7 +154,7 @@ bool MVSEngine::Initialize_ReconstructMesh(size_t argc, LPCTSTR* argv)
 	return true;
 }
 
-void MVSEngine::Finalize_ReconstructMesh()
+void MVSUSE::Finalize_ReconstructMesh()
 {
 #if TD_VERBOSE != TD_VERBOSE_OFF
 	// print memory statistics
@@ -164,7 +164,7 @@ void MVSEngine::Finalize_ReconstructMesh()
 }
 
 
-int MVSEngine::ReconstructMesh(int num, char * cmd[])
+int MVSUSE::ReconstructMesh(int num, char * cmd[])
 {
 #ifdef _DEBUGINFO
 	// set _crtBreakAlloc index to stop in <dbgheap.c> at allocation
