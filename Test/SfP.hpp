@@ -46,7 +46,7 @@ int StructureFromPoses(
 	std::string sOutFile,
 	std::string sMatchFile,
 	std::string sPairFile = "",
-	double dMax_reprojection_error = 4.0,
+	double dMax_reprojection_error = 8.0,
 	unsigned int ui_max_cache_size = 0,
 	int triangulation_method = static_cast<int>(ETriangulationMethod::DEFAULT),
 	bool bundle_adjustment = true,

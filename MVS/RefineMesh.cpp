@@ -148,15 +148,6 @@ bool Initialize_RefineMesh(size_t argc, LPCTSTR* argv)
 	return true;
 }
 
-// Finalize_RefineMesh application instance
-void Finalize_RefineMesh()
-{
-#if TD_VERBOSE != TD_VERBOSE_OFF
-	// print memory statistics
-	Util::LogMemoryInfo();
-#endif
-}
-
 int MVSUSE::RefineMesh(int agrs_num, const char* r_args[])
 {
 
@@ -210,6 +201,5 @@ int MVSUSE::RefineMesh(int agrs_num, const char* r_args[])
 	scene.Save(baseFileName + _T(".mvs"), (ARCHIVE_TYPE)OPT_RefineMesh::nArchiveType);
 	scene.mesh.Save(baseFileName + OPT_RefineMesh::strExportType);
 
-	Finalize_RefineMesh();
 	return EXIT_SUCCESS;
 }

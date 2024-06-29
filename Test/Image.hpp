@@ -29,6 +29,9 @@
 #include <cereal/archives/json.hpp>
 #include <cereal/details/helpers.hpp>
 
+#ifdef OPENMVG_USE_OPENMP
+#include <omp.h>
+#endif
 
 using namespace openMVG;
 using namespace openMVG::cameras;
@@ -414,6 +417,9 @@ int GetFeatures(
 	bool bForce = false
 )
 {
+#ifdef OPENMVG_USE_OPENMP
+	int iNumThreads = 0;
+#endif
 	std::cout
 		<< "\n" << "ÌØÕ÷µãËã·¨:" << ComputeMethod << std::endl;
 
@@ -499,7 +505,17 @@ int GetFeatures(
 
 	std::atomic<bool> preemptive_exit(false);
 
+#ifdef OPENMVG_USE_OPENMP
+    const unsigned int nb_max_thread = omp_get_max_threads();
 
+    if (iNumThreads > 0) {
+        omp_set_num_threads(iNumThreads);
+    } else {
+        omp_set_num_threads(nb_max_thread);
+    }
+	iNumThreads = nb_max_thread;
+	#pragma omp parallel for schedule(dynamic) if (iNumThreads > 0) private(imageGray)
+#endif
 	for (int i = 0; i < static_cast<int>(sfm_data.views.size()); ++i)
 	{
 		Views::const_iterator iterViews = sfm_data.views.begin();

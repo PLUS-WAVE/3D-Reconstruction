@@ -189,15 +189,6 @@ bool Initialize_Dense(size_t argc, LPCTSTR* argv)
 	return true;
 }
 
-// Finalize_Dense application instance
-void Finalize_Dense()
-{
-#if TD_VERBOSE != TD_VERBOSE_OFF
-	// print memory statistics
-	Util::LogMemoryInfo();
-#endif
-}
-
 void cleanCacheFiles(const std::string& workDir)
 {
 	std::vector<std::string> fileNames;
@@ -254,7 +245,6 @@ int MVSUSE::DensifyPointCloud(int agrs_num, const char* d_args[])
 	scene.Save(baseFileName + _T(".mvs"), (ARCHIVE_TYPE)OPT::nArchiveType);
 	scene.pointcloud.Save(baseFileName + _T(".ply"));
 
-	Finalize_Dense();
-	cleanCacheFiles(d_args[4]);
+	cleanCacheFiles(d_args[6]);
 	return EXIT_SUCCESS;
 }

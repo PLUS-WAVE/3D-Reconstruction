@@ -8,8 +8,6 @@ namespace MVSUSE
 
 	__declspec(dllexport) int RefineMesh(int agrs_num, const char* r_args[]);
 
-	bool Initialize_TextureMesh(size_t argc, LPCTSTR* argv);
-	void Finalize_TextureMesh();
-	__declspec(dllexport) int TextureMesh(int num, char* cmd[]);
+	__declspec(dllexport) int TextureMesh(int agrs_num, const char* t_args[]);
 
 }

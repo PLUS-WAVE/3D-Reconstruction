@@ -145,14 +145,6 @@ bool Initialize_ReconstructMesh(size_t argc, LPCTSTR* argv)
 	return true;
 }
 
-void Finalize_ReconstructMesh()
-{
-#if TD_VERBOSE != TD_VERBOSE_OFF
-	Util::LogMemoryInfo();
-#endif
-}
-
-
 int MVSUSE::ReconstructMesh(int agrs_num, const char * m_args[])
 {
 	if (!Initialize_ReconstructMesh(agrs_num, m_args))
@@ -236,6 +228,5 @@ int MVSUSE::ReconstructMesh(int agrs_num, const char * m_args[])
 	scene.Save(baseFileName + _T(".mvs"), (ARCHIVE_TYPE)OPT_ReconstructMesh::nArchiveType);
 	scene.mesh.Save(baseFileName + OPT_ReconstructMesh::strExportType);
 
-	Finalize_ReconstructMesh();
 	return EXIT_SUCCESS;
 }
