@@ -13,9 +13,8 @@ using namespace MVS;
 namespace OPT_ReconstructMesh {
 	String strInputFileName;
 	String strOutputFileName;
-	String strMeshFileName;
-	bool bMeshExport;
 	float fDistInsert;
+	bool bUseOnlyROI;
 	bool bUseConstantWeight;
 	bool bUseFreeSpaceSupport;
 	float fThicknessFactor;
@@ -33,7 +32,7 @@ namespace OPT_ReconstructMesh {
 	boost::program_options::variables_map vm;
 }
 
-bool MVSUSE::Initialize_ReconstructMesh(size_t argc, LPCTSTR* argv)
+bool Initialize_ReconstructMesh(size_t argc, LPCTSTR* argv)
 {
 	// Initialize_Dense log and console
 	CLOSE_LOGFILE();
@@ -67,6 +66,7 @@ bool MVSUSE::Initialize_ReconstructMesh(size_t argc, LPCTSTR* argv)
 		("input-file,i", boost::program_options::value<std::string>(&OPT_ReconstructMesh::strInputFileName), "input filename containing camera poses and image list")
 		("output-file,o", boost::program_options::value<std::string>(&OPT_ReconstructMesh::strOutputFileName), "output filename for storing the mesh")
 		("min-point-distance,d", boost::program_options::value<float>(&OPT_ReconstructMesh::fDistInsert)->default_value(2.5f), "minimum distance in pixels between the projection of two 3D points to consider them different while triangulating (0 - disabled)")
+		("integrate-only-roi", boost::program_options::value(&OPT_ReconstructMesh::bUseOnlyROI)->default_value(false), "use only the points inside the ROI")
 		("constant-weight", boost::program_options::value<bool>(&OPT_ReconstructMesh::bUseConstantWeight)->default_value(true), "considers all view weights 1 instead of the available weight")
 		("free-space-support,f", boost::program_options::value<bool>(&OPT_ReconstructMesh::bUseFreeSpaceSupport)->default_value(false), "exploits the free-space support in order to reconstruct weakly-represented surfaces")
 		("thickness-factor", boost::program_options::value<float>(&OPT_ReconstructMesh::fThicknessFactor)->default_value(1.f), "multiplier adjusting the minimum thickness considered during visibility weighting")
@@ -83,8 +83,8 @@ bool MVSUSE::Initialize_ReconstructMesh(size_t argc, LPCTSTR* argv)
 
 	boost::program_options::options_description hidden("Hidden options");
 	hidden.add_options()
-		("mesh-file", boost::program_options::value<std::string>(&OPT_ReconstructMesh::strMeshFileName), "mesh file name to clean (skips the reconstruction step)")
-		("mesh-export", boost::program_options::value<bool>(&OPT_ReconstructMesh::bMeshExport)->default_value(false), "just export the mesh contained in loaded project")
+		// ("mesh-file", boost::program_options::value<std::string>(&OPT_ReconstructMesh::strMeshFileName), "mesh file name to clean (skips the reconstruction step)")
+		// ("mesh-export", boost::program_options::value<bool>(&OPT_ReconstructMesh::bMeshExport)->default_value(false), "just export the mesh contained in loaded project")
 		;
 
 	boost::program_options::options_description cmdline_options;
@@ -116,10 +116,6 @@ bool MVSUSE::Initialize_ReconstructMesh(size_t argc, LPCTSTR* argv)
 	// Initialize_ReconstructMesh the log file
 	OPEN_LOGFILE(MAKE_PATH(APPNAME _T("-") + Util::getUniqueName(0) + _T(".log")).c_str());
 
-	// print application details: version and command line
-	//Util::LogBuild();
-	//LOG(_T("Command line:%s"), Util::CommandLineToString(argc, argv).c_str());
-
 	// validate input
 	Util::ensureValidPath(OPT_ReconstructMesh::strInputFileName);
 	Util::ensureUnifySlash(OPT_ReconstructMesh::strInputFileName);
@@ -145,131 +141,101 @@ bool MVSUSE::Initialize_ReconstructMesh(size_t argc, LPCTSTR* argv)
 		omp_set_num_threads(OPT_ReconstructMesh::nMaxThreads);
 #endif
 
-#ifdef _USE_BREAKPAD
-	// start memory dumper
-	MiniDumper::Create(APPNAME, WORKING_FOLDER);
-#endif
-
 	Util::Init();
 	return true;
 }
 
-void MVSUSE::Finalize_ReconstructMesh()
+void Finalize_ReconstructMesh()
 {
 #if TD_VERBOSE != TD_VERBOSE_OFF
-	// print memory statistics
 	Util::LogMemoryInfo();
 #endif
-
 }
 
 
-int MVSUSE::ReconstructMesh(int num, char * cmd[])
+int MVSUSE::ReconstructMesh(int agrs_num, const char * m_args[])
 {
-#ifdef _DEBUGINFO
-	// set _crtBreakAlloc index to stop in <dbgheap.c> at allocation
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);// | _CRTDBG_CHECK_ALWAYS_DF);
-#endif
-	int argc = num;
-	LPCTSTR* argv = (LPCTSTR*)cmd;
-
-	if (!Initialize_ReconstructMesh(argc, argv))
+	if (!Initialize_ReconstructMesh(agrs_num, m_args))
+	{
+		VERBOSE("error: failed to initialize");
 		return EXIT_FAILURE;
-
+	}
 
 	Scene scene(OPT_ReconstructMesh::nMaxThreads);
+
 	// load project
 	if (!scene.Load(OPT_ReconstructMesh::strInputFileName))
+	{
+		VERBOSE("error: failed to load project");
 		return EXIT_FAILURE;
-
-	if (OPT_ReconstructMesh::bMeshExport)
-	{
-		// check there is a mesh to export
-		if (scene.mesh.IsEmpty())
-			return EXIT_FAILURE;
-		// save mesh
-		const String fileName(OPT_ReconstructMesh::strOutputFileName);
-		scene.mesh.Save(fileName);
-#if TD_VERBOSE != TD_VERBOSE_OFF
-		if (VERBOSITY_LEVEL > 2)
-			scene.ExportCamerasMLP(Util::getFileFullName(OPT_ReconstructMesh::strOutputFileName) + _T(".mlp"), fileName);
-#endif
 	}
-	else
-	{
-		if (OPT_ReconstructMesh::strMeshFileName.IsEmpty()) {
-			// reset image resolution to the original size and
-			// make sure the image neighbors are Initialize_ReconstructMeshd before deleting the point-cloud
+
 #ifdef RECMESH_USE_OPENMP
-			bool bAbort(false);
+	bool bAbort(false);
 #pragma omp parallel for
-			for (int_t idx = 0; idx < (int_t)scene.images.GetSize(); ++idx) {
+	for (int_t idx = 0; idx < (int_t)scene.images.GetSize(); ++idx) {
 #pragma omp flush (bAbort)
-				if (bAbort)
-					continue;
-				const uint32_t idxImage((uint32_t)idx);
+		if (bAbort)
+			continue;
+		const uint32_t idxImage((uint32_t)idx);
 #else
-			FOREACH(idxImage, scene.images) {
+	FOREACH(idxImage, scene.images) {
 #endif
-				Image& imageData = scene.images[idxImage];
-				if (!imageData.IsValid())
-					continue;
-				// reset image resolution
-				if (!imageData.ReloadImage(0, false)) {
+		Image& imageData = scene.images[idxImage];
+		if (!imageData.IsValid())
+			continue;
+		// reset image resolution
+		if (!imageData.ReloadImage(0, false)) {
 #ifdef RECMESH_USE_OPENMP
-					bAbort = true;
+			bAbort = true;
 #pragma omp flush (bAbort)
-					continue;
+			continue;
 #else
-					return EXIT_FAILURE;
-#endif
-				}
-				imageData.UpdateCamera(scene.platforms);
-				// select neighbor views
-				if (imageData.neighbors.IsEmpty()) {
-					IndexArr points;
-					scene.SelectNeighborViews(idxImage, points);
-				}
-			}
-#ifdef RECMESH_USE_OPENMP
-			if (bAbort)
-				return EXIT_FAILURE;
-#endif
-			// reconstruct a coarse mesh from the given point-cloud
-			TD_TIMER_START();
-			if (OPT_ReconstructMesh::bUseConstantWeight)
-				scene.pointcloud.pointWeights.Release();
-			if (!scene.ReconstructMesh(OPT_ReconstructMesh::fDistInsert, OPT_ReconstructMesh::bUseFreeSpaceSupport, 4, OPT_ReconstructMesh::fThicknessFactor, OPT_ReconstructMesh::fQualityFactor))
-				return EXIT_FAILURE;
-			VERBOSE("三角网重建完成: %u vertices, %u faces (%s)", scene.mesh.vertices.GetSize(), scene.mesh.faces.GetSize(), TD_TIMER_GET_FMT().c_str());
-#if TD_VERBOSE != TD_VERBOSE_OFF
-			if (VERBOSITY_LEVEL > 2) {
-				// dump raw mesh
-				scene.mesh.Save(MAKE_PATH_SAFE(Util::getFileFullName(OPT_ReconstructMesh::strOutputFileName)) + _T("_raw") + OPT_ReconstructMesh::strExportType);
-			}
-#endif
-			}
-		else {
-			// load existing mesh to clean
-			scene.mesh.Load(MAKE_PATH_SAFE(OPT_ReconstructMesh::strMeshFileName));
-		}
-
-		// clean the mesh
-		scene.mesh.Clean(OPT_ReconstructMesh::fDecimateMesh, OPT_ReconstructMesh::fRemoveSpurious, OPT_ReconstructMesh::bRemoveSpikes, OPT_ReconstructMesh::nCloseHoles, OPT_ReconstructMesh::nSmoothMesh, false);
-		scene.mesh.Clean(1.f, 0.f, OPT_ReconstructMesh::bRemoveSpikes, OPT_ReconstructMesh::nCloseHoles, 0, false); // extra cleaning trying to close more holes
-		scene.mesh.Clean(1.f, 0.f, false, 0, 0, true); // extra cleaning to remove non-manifold problems created by closing holes
-
-		// save the final mesh
-		const String baseFileName(Util::getFileFullName(OPT_ReconstructMesh::strOutputFileName));
-		scene.Save(baseFileName + _T(".mvs"), (ARCHIVE_TYPE)OPT_ReconstructMesh::nArchiveType);
-		scene.mesh.Save(baseFileName + OPT_ReconstructMesh::strExportType);
-#if TD_VERBOSE != TD_VERBOSE_OFF
-		if (VERBOSITY_LEVEL > 2)
-			scene.ExportCamerasMLP(baseFileName + _T(".mlp"), baseFileName + OPT_ReconstructMesh::strExportType);
+			return EXIT_FAILURE;
 #endif
 		}
+		imageData.UpdateCamera(scene.platforms);
+		// select neighbor views
+		if (imageData.neighbors.IsEmpty()) {
+			IndexArr points;
+			scene.SelectNeighborViews(idxImage, points);
+		}
+	}
+#ifdef RECMESH_USE_OPENMP
+	if (bAbort)
+		return EXIT_FAILURE;
+#endif
+	// reconstruct a coarse mesh from the given point-cloud
+	TD_TIMER_START();
+	if (OPT_ReconstructMesh::bUseConstantWeight)
+	{
+		scene.pointcloud.pointWeights.Release();
+	}
+
+	if (!scene.ReconstructMesh(
+		OPT_ReconstructMesh::fDistInsert, 
+		OPT_ReconstructMesh::bUseFreeSpaceSupport,
+		OPT_ReconstructMesh::bUseOnlyROI,
+		4, 
+		OPT_ReconstructMesh::fThicknessFactor, 
+		OPT_ReconstructMesh::fQualityFactor))
+	{
+		VERBOSE("error: failed to reconstruct mesh");
+		return EXIT_FAILURE;
+	}
+
+	VERBOSE("三角网重建完成: %u vertices, %u faces (%s)", scene.mesh.vertices.GetSize(), scene.mesh.faces.GetSize(), TD_TIMER_GET_FMT().c_str());
+
+	// clean the mesh
+	scene.mesh.Clean(OPT_ReconstructMesh::fDecimateMesh, OPT_ReconstructMesh::fRemoveSpurious, OPT_ReconstructMesh::bRemoveSpikes, OPT_ReconstructMesh::nCloseHoles, OPT_ReconstructMesh::nSmoothMesh, false);
+	scene.mesh.Clean(1.f, 0.f, OPT_ReconstructMesh::bRemoveSpikes, OPT_ReconstructMesh::nCloseHoles, 0, false); // extra cleaning trying to close more holes
+	scene.mesh.Clean(1.f, 0.f, false, 0, 0, true); // extra cleaning to remove non-manifold problems created by closing holes
+
+	// save the final mesh
+	const String baseFileName(Util::getFileFullName(OPT_ReconstructMesh::strOutputFileName));
+	scene.Save(baseFileName + _T(".mvs"), (ARCHIVE_TYPE)OPT_ReconstructMesh::nArchiveType);
+	scene.mesh.Save(baseFileName + OPT_ReconstructMesh::strExportType);
 
 	Finalize_ReconstructMesh();
 	return EXIT_SUCCESS;
-	}
-/*----------------------------------------------------------------*/
+}

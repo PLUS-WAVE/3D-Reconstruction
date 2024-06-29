@@ -172,17 +172,15 @@ int main(int argc, char* argv[])
 		std::string densifyInputFile = MVSOutputDir + "/sfm_scene.mvs";
 		std::string densifyOutputFile = densifyOutputDir + "/scene_dense.mvs";
 
-		const char* d_args[9];
+		const char* d_args[7];
 
 		d_args[1] = "-i";
 		d_args[2] = (char*)densifyInputFile.data();
-		d_args[3] = "-w";
-		d_args[4] = (char*)densifyOutputDir.data();
-		d_args[5] = "-o";
-		d_args[6] = (char*)densifyOutputFile.data();
-		d_args[7] = "--max-threads";
-		d_args[8] = "16";
-		MVSUSE::DensifyPointCloud(9, d_args);
+		d_args[3] = "-o";
+		d_args[4] = (char*)densifyOutputFile.data();
+		d_args[5] = "-w";
+		d_args[6] = (char*)densifyOutputDir.data();
+		// MVSUSE::DensifyPointCloud(7, d_args);
 
 		std::cout
 			<< "\n-----------------------------------------------------------"
@@ -204,19 +202,21 @@ int main(int argc, char* argv[])
 		std::string reconstructMeshInputFile = densifyOutputDir + "/scene_dense.mvs";
 		std::string reconstructMeshOutputFile = reconstructMeshOutputDir + "/scene_dense_mesh.mvs";
 
-		char* cmd1[9];
-		char t1[200];
+		const char* m_args[7];
 
-		cmd1[0] = t1;
-		cmd1[1] = "-i";
-		cmd1[2] = (char*)reconstructMeshInputFile.data();
-		cmd1[3] = "-d";
-		cmd1[4] = "2.5";
-		cmd1[5] = "-o";
-		cmd1[6] = (char*)reconstructMeshOutputFile.data();
-		cmd1[7] = "-w";
-		cmd1[8] = (char*)reconstructMeshOutputDir.data();
-		MVSUSE::ReconstructMesh(9, cmd1);
+		m_args[1] = "-i";
+		m_args[2] = (char*)reconstructMeshInputFile.data();
+		m_args[3] = "-o";
+		m_args[4] = (char*)reconstructMeshOutputFile.data();
+		m_args[5] = "-w";
+		m_args[6] = (char*)reconstructMeshOutputDir.data();
+		// MVSUSE::ReconstructMesh(7, m_args);
+
+		std::cout
+			<< "\n-----------------------------------------------------------"
+			<< "\n Refine Mesh:"
+			<< "\n-----------------------------------------------------------"
+			<< std::endl;
 
 
 		if (!stlplus::folder_exists(refineMeshOutputDir))

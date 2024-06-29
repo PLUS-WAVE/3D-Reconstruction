@@ -2,11 +2,9 @@
 
 namespace MVSUSE
 {
-	__declspec(dllexport) int DensifyPointCloud(int agrs_num, const char* d_agrs[]);
+	__declspec(dllexport) int DensifyPointCloud(int agrs_num, const char* d_args[]);
 
-	bool Initialize_ReconstructMesh(size_t argc, LPCTSTR* argv);
-	void Finalize_ReconstructMesh();
-	__declspec(dllexport) int ReconstructMesh(int num, char* cmd[]);
+	__declspec(dllexport) int ReconstructMesh(int agrs_num, const char* m_args[]);
 
 	bool Initialize_RefineMesh(size_t argc, LPCTSTR* argv);
 	void Finalize_RefineMesh();

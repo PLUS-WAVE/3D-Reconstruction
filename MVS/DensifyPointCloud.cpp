@@ -218,10 +218,11 @@ void cleanCacheFiles(const std::string& workDir)
 	}
 }
 
-int MVSUSE::DensifyPointCloud(int agrs_num, const char* d_agrs[])
+int MVSUSE::DensifyPointCloud(int agrs_num, const char* d_args[])
 {
-	if (!Initialize_Dense(agrs_num, d_agrs))
+	if (!Initialize_Dense(agrs_num, d_args))
 	{
+		VERBOSE("error: failed to initialize");
 		return EXIT_FAILURE;
 	}
 
@@ -254,6 +255,6 @@ int MVSUSE::DensifyPointCloud(int agrs_num, const char* d_agrs[])
 	scene.pointcloud.Save(baseFileName + _T(".ply"));
 
 	Finalize_Dense();
-	cleanCacheFiles(d_agrs[4]);
+	cleanCacheFiles(d_args[4]);
 	return EXIT_SUCCESS;
 }
