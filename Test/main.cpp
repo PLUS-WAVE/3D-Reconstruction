@@ -10,17 +10,14 @@
 int main(int argc, char* argv[])
 {
 
-	// 检查命令行参数数量
 	if (argc < 3) {
 		std::cerr << "Usage: " << argv[0] << " <imagesInputDir> <kmatrix>" << std::endl;
 		return EXIT_FAILURE;
 	}
 
-	// 计算时间
 	clock_t start, end;
 	start = clock();
 
-	// std::string imagesInputDir = "data/Castle";
 	std::string imagesInputDir = argv[1];
 	std::string resultOutputDir = imagesInputDir + "/Output";
 	std::string matchesOutputDir = resultOutputDir + "/Describers&Matches";
@@ -218,7 +215,6 @@ int main(int argc, char* argv[])
 			<< "\n-----------------------------------------------------------"
 			<< std::endl;
 
-
 		if (!stlplus::folder_exists(refineMeshOutputDir))
 		{
 			if (!stlplus::folder_create(refineMeshOutputDir))
@@ -233,20 +229,21 @@ int main(int argc, char* argv[])
 		std::string refineMeshInputFile = reconstructMeshOutputDir + "/scene_dense_mesh.mvs";
 		std::string refineMeshOutputFile = refineMeshOutputDir + "/scene_dense_mesh_refine.mvs";
 
-		char* cmd2[9];
-		char t2[200];
+		const char* r_args[7];
 
-		cmd2[0] = t2;
-		cmd2[1] = "-i";
-		cmd2[2] = (char*)refineMeshInputFile.data();
-		cmd2[3] = "--resolution-level";
-		cmd2[4] = "0";
-		cmd2[5] = "-o";
-		cmd2[6] = (char*)refineMeshOutputFile.data();
-		cmd2[7] = "-w";
-		cmd2[8] = (char*)refineMeshOutputDir.data();
-		MVSUSE::RefineMesh(9, cmd2);
+		r_args[1] = "-i";
+		r_args[2] = (char*)refineMeshInputFile.data();
+		r_args[3] = "-o";
+		r_args[4] = (char*)refineMeshOutputFile.data();
+		r_args[5] = "-w";
+		r_args[6] = (char*)refineMeshOutputDir.data();
+		MVSUSE::RefineMesh(7, r_args);
 
+		std::cout
+			<< "\n-----------------------------------------------------------"
+			<< "\n Texture Mesh:"
+			<< "\n-----------------------------------------------------------"
+			<< std::endl;
 
 		if (!stlplus::folder_exists(textureMeshOutputDir))
 		{

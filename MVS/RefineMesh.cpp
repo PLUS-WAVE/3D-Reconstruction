@@ -8,7 +8,6 @@ using namespace MVS;
 namespace OPT_RefineMesh {
 	String strInputFileName;
 	String strOutputFileName;
-	String strMeshFileName;
 	unsigned nResolutionLevel;
 	unsigned nMinResolution;
 	unsigned nMaxViews;
@@ -36,7 +35,7 @@ namespace OPT_RefineMesh {
 } // namespace OPT_RefineMesh
 
 
-bool MVSUSE::Initialize_RefineMesh(size_t argc, LPCTSTR* argv)
+bool Initialize_RefineMesh(size_t argc, LPCTSTR* argv)
 {
 	// Initialize_Dense log and console
 	CLOSE_LOGFILE();
@@ -91,7 +90,7 @@ bool MVSUSE::Initialize_RefineMesh(size_t argc, LPCTSTR* argv)
 
 	boost::program_options::options_description hidden("Hidden options");
 	hidden.add_options()
-		("mesh-file", boost::program_options::value<std::string>(&OPT_RefineMesh::strMeshFileName), "mesh file name to refine (overwrite the existing mesh)")
+		// ("mesh-file", boost::program_options::value<std::string>(&OPT_RefineMesh::strMeshFileName), "mesh file name to refine (overwrite the existing mesh)")
 		;
 
 	boost::program_options::options_description cmdline_options;
@@ -123,10 +122,6 @@ bool MVSUSE::Initialize_RefineMesh(size_t argc, LPCTSTR* argv)
 
 	OPEN_LOGFILE(MAKE_PATH(APPNAME _T("-") + Util::getUniqueName(0) + _T(".log")).c_str());
 
-	//Util::LogBuild();
-	//LOG(_T("Command line:%s"), Util::CommandLineToString(argc, argv).c_str());
-
-
 	Util::ensureValidPath(OPT_RefineMesh::strInputFileName);
 	Util::ensureUnifySlash(OPT_RefineMesh::strInputFileName);
 	if (OPT_RefineMesh::vm.count("help") || OPT_RefineMesh::strInputFileName.IsEmpty()) {
@@ -149,49 +144,42 @@ bool MVSUSE::Initialize_RefineMesh(size_t argc, LPCTSTR* argv)
 		omp_set_num_threads(OPT_RefineMesh::nMaxThreads);
 #endif
 
-#ifdef _USE_BREAKPAD
-	// start memory dumper
-	MiniDumper::Create(APPNAME, WORKING_FOLDER);
-#endif
-
 	Util::Init();
 	return true;
 }
 
 // Finalize_RefineMesh application instance
-void MVSUSE::Finalize_RefineMesh()
+void Finalize_RefineMesh()
 {
 #if TD_VERBOSE != TD_VERBOSE_OFF
 	// print memory statistics
 	Util::LogMemoryInfo();
 #endif
-
 }
 
-int MVSUSE::RefineMesh(int num, char* cmd[])
+int MVSUSE::RefineMesh(int agrs_num, const char* r_args[])
 {
-#ifdef _DEBUGINFO
-	// set _crtBreakAlloc index to stop in <dbgheap.c> at allocation
-	_CrtSetDbgFlag(_CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);// | _CRTDBG_CHECK_ALWAYS_DF);
-#endif
-	int argc = num;
-	LPCTSTR* argv = (LPCTSTR*)cmd;
 
-	if (!Initialize_RefineMesh(argc, argv))
+	if (!Initialize_RefineMesh(agrs_num, r_args))
+	{
+		VERBOSE("error: failed to initialize");
 		return EXIT_FAILURE;
+	}
 
 	Scene scene(OPT_RefineMesh::nMaxThreads);
 	// load and refine the coarse mesh
 	if (!scene.Load(OPT_RefineMesh::strInputFileName))
+	{
+		VERBOSE("error: failed to load input scene");
 		return EXIT_FAILURE;
-	if (!OPT_RefineMesh::strMeshFileName.IsEmpty()) {
-		// load given coarse mesh
-		scene.mesh.Load(OPT_RefineMesh::strMeshFileName);
 	}
+
+
 	if (scene.mesh.IsEmpty()) {
 		VERBOSE("error: empty initial mesh");
 		return EXIT_FAILURE;
 	}
+
 	TD_TIMER_START();
 #ifdef _USE_CUDA
 	if (!OPT_RefineMesh::bUseCUDA ||
@@ -204,28 +192,24 @@ int MVSUSE::RefineMesh(int num, char* cmd[])
 			OPT_RefineMesh::fRatioRigidityElasticity,
 			OPT_RefineMesh::fGradientStep))
 #endif
-		if (!scene.RefineMesh(OPT_RefineMesh::nResolutionLevel, OPT_RefineMesh::nMinResolution, OPT_RefineMesh::nMaxViews,
-			OPT_RefineMesh::fDecimateMesh, OPT_RefineMesh::nCloseHoles, OPT_RefineMesh::nEnsureEdgeSize,
-			OPT_RefineMesh::nMaxFaceArea,
-			OPT_RefineMesh::nScales, OPT_RefineMesh::fScaleStep,
-			OPT_RefineMesh::nReduceMemory, OPT_RefineMesh::nAlternatePair,
-			OPT_RefineMesh::fRegularityWeight,
-			OPT_RefineMesh::fRatioRigidityElasticity,
-			OPT_RefineMesh::fPlanarVertexRatio,
-			OPT_RefineMesh::fGradientStep))
+	if (!scene.RefineMesh(OPT_RefineMesh::nResolutionLevel, OPT_RefineMesh::nMinResolution, OPT_RefineMesh::nMaxViews,
+		OPT_RefineMesh::fDecimateMesh, OPT_RefineMesh::nCloseHoles, OPT_RefineMesh::nEnsureEdgeSize,
+		OPT_RefineMesh::nMaxFaceArea,
+		OPT_RefineMesh::nScales, OPT_RefineMesh::fScaleStep,
+		OPT_RefineMesh::nReduceMemory, OPT_RefineMesh::nAlternatePair,
+		OPT_RefineMesh::fRegularityWeight,
+		OPT_RefineMesh::fRatioRigidityElasticity,
+		OPT_RefineMesh::fPlanarVertexRatio,
+		OPT_RefineMesh::fGradientStep))
 			return EXIT_FAILURE;
-	VERBOSE("Mesh refinement completed: %u vertices, %u faces (%s)", scene.mesh.vertices.GetSize(), scene.mesh.faces.GetSize(), TD_TIMER_GET_FMT().c_str());
+
+	VERBOSE("Mesh 优化完成: %u vertices, %u faces (%s)", scene.mesh.vertices.GetSize(), scene.mesh.faces.GetSize(), TD_TIMER_GET_FMT().c_str());
 
 	// save the final mesh
 	const String baseFileName(Util::getFileFullName(OPT_RefineMesh::strOutputFileName));
 	scene.Save(baseFileName + _T(".mvs"), (ARCHIVE_TYPE)OPT_RefineMesh::nArchiveType);
 	scene.mesh.Save(baseFileName + OPT_RefineMesh::strExportType);
-#if TD_VERBOSE != TD_VERBOSE_OFF
-	if (VERBOSITY_LEVEL > 2)
-		scene.ExportCamerasMLP(baseFileName + _T(".mlp"), baseFileName + OPT_RefineMesh::strExportType);
-#endif
 
 	Finalize_RefineMesh();
 	return EXIT_SUCCESS;
 }
-/*----------------------------------------------------------------*/

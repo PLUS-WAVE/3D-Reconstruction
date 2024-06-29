@@ -6,9 +6,7 @@ namespace MVSUSE
 
 	__declspec(dllexport) int ReconstructMesh(int agrs_num, const char* m_args[]);
 
-	bool Initialize_RefineMesh(size_t argc, LPCTSTR* argv);
-	void Finalize_RefineMesh();
-	__declspec(dllexport) int RefineMesh(int num, char* cmd[]);
+	__declspec(dllexport) int RefineMesh(int agrs_num, const char* r_args[]);
 
 	bool Initialize_TextureMesh(size_t argc, LPCTSTR* argv);
 	void Finalize_TextureMesh();

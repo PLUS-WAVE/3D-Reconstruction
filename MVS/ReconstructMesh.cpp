@@ -224,7 +224,7 @@ int MVSUSE::ReconstructMesh(int agrs_num, const char * m_args[])
 		return EXIT_FAILURE;
 	}
 
-	VERBOSE("三角网重建完成: %u vertices, %u faces (%s)", scene.mesh.vertices.GetSize(), scene.mesh.faces.GetSize(), TD_TIMER_GET_FMT().c_str());
+	VERBOSE("Mesh 重建完成: %u vertices, %u faces (%s)", scene.mesh.vertices.GetSize(), scene.mesh.faces.GetSize(), TD_TIMER_GET_FMT().c_str());
 
 	// clean the mesh
 	scene.mesh.Clean(OPT_ReconstructMesh::fDecimateMesh, OPT_ReconstructMesh::fRemoveSpurious, OPT_ReconstructMesh::bRemoveSpikes, OPT_ReconstructMesh::nCloseHoles, OPT_ReconstructMesh::nSmoothMesh, false);
