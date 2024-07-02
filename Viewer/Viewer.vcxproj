@@ -141,7 +141,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Camera.cpp" />
-    <ClCompile Include="Common.cpp" />
     <ClCompile Include="Image.cpp" />
     <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Viewer.cpp" />

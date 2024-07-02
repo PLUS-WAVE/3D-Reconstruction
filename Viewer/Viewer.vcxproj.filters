@@ -35,9 +35,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Common.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Image.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
