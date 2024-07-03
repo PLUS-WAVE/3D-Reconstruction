@@ -3,6 +3,7 @@
 #include "Match.hpp"
 #include "SfP.hpp"
 #include "Export2MVS.hpp"
+#include "Main.hpp"
 
 #include <Windows.h>
 #include "../MVS/MVSUSE.h"
@@ -27,25 +28,16 @@ void CopyRelevantFiles(const std::string& sourceDirectory, const std::string& de
 	}
 }
 
-int main(int argc, char* argv[])
+int MAIN::start(std::string imagesInputDir, std::string kmatrix, std::string describerMethod,
+                std::string finalExportFormat, int task)
 {
-
-	if (argc < 3) {
-		std::cerr << "Usage: " << argv[0] << " <imagesInputDir> <kmatrix>" << std::endl;
-		return EXIT_FAILURE;
-	}
-
 	clock_t start, end;
 	start = clock();
 
-	std::string imagesInputDir = argv[1];
+
 	std::string resultOutputDir = imagesInputDir + "/Output";
 	std::string matchesOutputDir = resultOutputDir + "/Describers&Matches";
 	std::string sfmOutputDir = resultOutputDir + "/SfM_Output";
-
-	std::string kmatrix = argv[2];
-
-	std::string describerMethod = "AKAZE_FLOAT";
 
 	std::string MVSOutputDir = resultOutputDir + "/MVS_Output";
 	std::string densifyOutputDir = MVSOutputDir + "/Densify";
@@ -53,10 +45,8 @@ int main(int argc, char* argv[])
 	std::string refineMeshOutputDir = MVSOutputDir + "/RefineMesh";
 	std::string textureMeshOutputDir = MVSOutputDir + "/TextureMesh";
 
-	std::string finalExportFormat = "obj";
 	std::string finalExportDir = resultOutputDir + "/FinalExport";
 
-	int task = 0;
 	switch (task)
 	{
 	case 0:
@@ -169,7 +159,7 @@ int main(int argc, char* argv[])
 	
 		printf("\n完成\n");
 	
-		// break;
+		break;
 	
 	case 1:
 		std::cout
@@ -293,21 +283,21 @@ int main(int argc, char* argv[])
 		t_args[7] = "--export-type";
 		t_args[8] = (char*)finalExportFormat.data();
 		MVSUSE::TextureMesh(9, t_args);
-	
+
+		if (!stlplus::folder_exists(finalExportDir))
+		{
+			if (!stlplus::folder_create(finalExportDir))
+			{
+				printf("创建文件夹失败\n");
+				return EXIT_FAILURE;
+			}
+		}
+
+		std::vector<std::string> extensions = { "mtl", "jpg", finalExportFormat };
+		CopyRelevantFiles(textureMeshOutputDir, finalExportDir, extensions);
+
 		break;
 	}
-
-	if (!stlplus::folder_exists(finalExportDir))
-	{
-		if (!stlplus::folder_create(finalExportDir))
-		{
-			printf("创建文件夹失败\n");
-			return EXIT_FAILURE;
-		}
-	}
-
-	std::vector<std::string> extensions = { "mtl", "jpg", finalExportFormat };
-	CopyRelevantFiles(textureMeshOutputDir, finalExportDir, extensions);
 
 	end = clock();
 
@@ -319,6 +309,6 @@ int main(int argc, char* argv[])
 
 	std::cout << "\nTotal Time: " << (double)(end - start) / CLOCKS_PER_SEC << "s" << std::endl;
 
-	return 0;
+	return EXIT_SUCCESS;
 }
 

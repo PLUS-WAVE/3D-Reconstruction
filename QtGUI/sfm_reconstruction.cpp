@@ -1,14 +1,23 @@
 #include "sfm_reconstruction.h"
 #include <functional>
-#include <QDebug>
 #include <QMessageBox>
-#include<Windows.h>
+#include <Windows.h>
 
-bool performSFMReconstruction(const QString& cameraModel, const QString& imageFolderPath,const QString& algorithm, const QString &save,const std::function<void(const QString&)>& logCallback)
+#include "../Main/Main.hpp"
+
+bool performSFMReconstruction(const QString& cameraIntrinsics, const QString& imageFolderPath,const QString& algorithm, const QString &save, const std::function<void(const QString&)>& logCallback)
 {
+	if (MAIN::start(imageFolderPath.toStdString(), cameraIntrinsics.toStdString(), algorithm.toStdString(), save.toStdString(), 0))
+	{
+        logCallback("SFM重建失败");
+        return false;
+	}
+    logCallback("SFM重建成功");
+    return true;
+
     logCallback("开始SFM重建...");
     Sleep(1000);
-    logCallback("相机模型: " + cameraModel);
+    logCallback("相机模型: " + cameraIntrinsics);
     Sleep(1000);
     logCallback("图片文件夹: " + imageFolderPath);
     Sleep(1000);

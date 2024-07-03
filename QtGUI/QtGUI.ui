@@ -16,10 +16,10 @@
   <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>0</x>
+     <x>10</x>
      <y>-10</y>
-     <width>320</width>
-     <height>80</height>
+     <width>340</width>
+     <height>61</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
@@ -62,11 +62,14 @@
      <height>81</height>
     </rect>
    </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="QtWidgetsApplication1.qrc"/>
+  <include location="QtGUI.qrc"/>
  </resources>
  <connections/>
 </ui>

@@ -41,5 +41,8 @@
     <ClInclude Include="Export2MVS.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="Main.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

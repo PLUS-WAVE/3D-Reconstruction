@@ -3,8 +3,8 @@
 #include <QFile>
 #include <QTextStream>
 #include <QMessageBox>
-#include<QFileDialog>
-#include<QVariant>
+#include <QFileDialog>
+#include <QVariant>
 #include <QCoreApplication>
 
 
@@ -47,8 +47,8 @@ void QtGUI::on1selected()
     CameraDialog* dialog = new CameraDialog(this);
     dialog->setAttribute(Qt::WA_DeleteOnClose);
     dialog->show();
-    connect(dialog, &CameraDialog::cameraModelSelected, this, [this](const QString& model) {
-        m_cameraModel = model; // 将相机型号保存到成员变量
+    connect(dialog, &CameraDialog::cameraIntrinsicsSelected, this, [this](const QString& Intrinsics) {
+        m_cameraIntrinsics = Intrinsics; // 将相机型号保存到成员变量
         });
 }
 
@@ -94,69 +94,72 @@ void QtGUI::on4selected()
     connect(dialog, &SaveDialog::SaveSelected, this, &QtGUI::onSaveSelected);
 }
 
-//相机
+QString CameraDialog::validateKMatrix(const QString& kMatrixString)
+{
+    // 使用分号分割字符串
+    QStringList parts = kMatrixString.split(";");
+    if (parts.size() != 9) {
+        return "K矩阵应包含9个数字以;分隔";
+    }
+
+    // 尝试将每个部分转换为浮点数，并验证转换是否成功
+    bool ok;
+    QVector<double> kMatrixValues;
+    for (const QString& part : parts) {
+        double value = part.toDouble(&ok);
+        if (!ok) {
+            return "K矩阵包含非数字字符";
+        }
+        kMatrixValues.append(value);
+    }
+
+    return "K矩阵验证并处理成功";
+}
+
 CameraDialog::CameraDialog(QWidget* parent)
 {
-    setWindowTitle("选择摄像机");
+    setWindowTitle("请输入相机内参K矩阵（如：2905.88;0;1416;0;2905.88;1064;0;0;1）");
     QVBoxLayout* layout = new QVBoxLayout(this);
 
-    modelLineEdit = new QLineEdit(this);
+    IntrinsicsLineEdit = new QLineEdit(this);
     confirmButton = new QPushButton("确认", this);
-    resultLabel = new QLabel(this);
 
-    layout->addWidget(new QLabel("输入相机型号：", this));
-    layout->addWidget(modelLineEdit);
+    layout->addWidget(new QLabel("输入K矩阵：", this));
+    layout->addWidget(IntrinsicsLineEdit);
     layout->addWidget(confirmButton);
-    layout->addWidget(resultLabel);
 
     setLayout(layout);
+    resize(420, 95);
 
     connect(confirmButton, &QPushButton::clicked, this, &CameraDialog::onConfirmClicked);
 }
 
-void CameraDialog::onConfirmClicked()//点击寻找功能
+void CameraDialog::onConfirmClicked()
 {
-    QString model = modelLineEdit->text();
-    QString result = searchCamera(model);
-    resultLabel->setText(result);
-    emit cameraModelSelected(model);
+    QString kMatrixString = IntrinsicsLineEdit->text();
+    QString result = validateKMatrix(kMatrixString);
+
+    if (result == "K矩阵验证并处理成功") {
+        QMessageBox::information(this, "验证成功", result);
+        emit cameraIntrinsicsSelected(kMatrixString);
+        accept();
+    }
+    else {
+        QMessageBox::critical(this, "验证失败", result);
+        IntrinsicsLineEdit->clear();
+    }
 }
 
 
-QString CameraDialog::searchCamera(const QString& model)
-{
-    QFile file("cameras.txt");
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        return "Error: Cannot open database file.";
-    }
-
-    QTextStream in(&file);
-    while (!in.atEnd())
-    {
-        QString line = in.readLine();
-        QStringList parts = line.split(',');
-        if (parts.size() >= 2 && parts[0].trimmed() == model.trimmed())
-        {
-            file.close();
-            return parts[1].trimmed();
-            
-        }
-    }
-
-    file.close();
-    return "Camera model not found.";
-}
-//相机
 void QtGUI::executeSFM()
 {
-    if (m_cameraModel.isEmpty() || m_imageFolderPath.isEmpty() || m_algorithm.isEmpty()) {
-        QMessageBox::warning(this, "错误", "请先选择相机型号、图片文件夹和匹配算法");
+    if (m_cameraIntrinsics.isEmpty() || m_imageFolderPath.isEmpty()) {
+        QMessageBox::warning(this, "错误", "请先至少选择相机内参、图片文件夹");
         return;
     }
 
     // 调用 SFM 重建函数
-    bool success = performSFMReconstruction(m_cameraModel, m_imageFolderPath, m_algorithm,m_save,
+    bool success = performSFMReconstruction(m_cameraIntrinsics, m_imageFolderPath, m_algorithm, m_save,
         [this](const QString& message) {
             appendToTextEdit(message);
         });
@@ -177,7 +180,7 @@ void QtGUI::appendToTextEdit(const QString& text)
         QCoreApplication::processEvents();
         }
 }
-//算法选择
+
 AlgorithmDialog::AlgorithmDialog(QWidget* parent) : QDialog(parent)
 {
     setWindowTitle("选择匹配算法");
@@ -190,7 +193,6 @@ AlgorithmDialog::AlgorithmDialog(QWidget* parent) : QDialog(parent)
     algorithmComboBox->addItem("SIFT_ANATOMY");
     algorithmComboBox->addItem("AKAZE_FLOAT");
     algorithmComboBox->addItem("AKAZE_MLDB");
-    // 可以根据需要添加更多算法
 
     layout->addWidget(new QLabel("选择匹配算法：", this));
     layout->addWidget(algorithmComboBox);
@@ -213,7 +215,6 @@ void QtGUI::onAlgorithmSelected(const QString& algorithm)
     m_algorithm = algorithm;
     QMessageBox::information(this, "算法选择", QString("选择的匹配算法：%1").arg(algorithm));
 }
-//算法选择
 
 SaveDialog::SaveDialog(QWidget* parent)
 {
@@ -226,7 +227,6 @@ SaveDialog::SaveDialog(QWidget* parent)
     // 添加保存选项
     SaveComboBox->addItem("ply");
     SaveComboBox->addItem("obj");
-    // 可以根据需要添加格式
 
     layout->addWidget(new QLabel("选择保存格式：", this));
     layout->addWidget(SaveComboBox);

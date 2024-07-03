@@ -1,4 +1,3 @@
 <RCC>
-    <qresource prefix="QtWidgetsApplication1">
-    </qresource>
+    <qresource prefix="/QtGUI"/>
 </RCC>

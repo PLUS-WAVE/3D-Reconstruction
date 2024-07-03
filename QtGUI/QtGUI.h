@@ -27,10 +27,10 @@ private:
     Ui::QtWidgetsApplication1Class ui;
     QTextEdit* m_textedit;
     QMenu* set_menu;
-    QString m_cameraModel;
+    QString m_cameraIntrinsics;
     QString m_imageFolderPath;
-    QString m_algorithm;
-    QString m_save;
+    QString m_algorithm = "AKAZE_FLOAT";
+    QString m_save = "ply";
     void executeSFM();
 private slots:
     void on1selected();
@@ -49,18 +49,17 @@ class CameraDialog : public QDialog
 
 public:
     explicit CameraDialog(QWidget* parent = nullptr);
+    QString validateKMatrix(const QString& kMatrix);
 
 signals:
-    void cameraModelSelected(const QString& model);
+    void cameraIntrinsicsSelected(const QString& model);
 
 private slots:
     void onConfirmClicked();
 
 private:
-    QLineEdit* modelLineEdit;
+    QLineEdit* IntrinsicsLineEdit;
     QPushButton* confirmButton;
-    QLabel* resultLabel;
-    QString searchCamera(const QString& model);
 };
 
 class AlgorithmDialog : public QDialog

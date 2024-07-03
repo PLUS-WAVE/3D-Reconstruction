@@ -3,7 +3,7 @@
 
 #include <QString>
 
-bool performSFMReconstruction(const QString& cameraModel,
+bool performSFMReconstruction(const QString& cameraIntrinsics,
     const QString& imageFolderPath,
     const QString& algorithm,
     const QString& save,
