@@ -6,7 +6,9 @@
 #include <QFileDialog>
 #include <QVariant>
 #include <QCoreApplication>
+#include <QStringConverter>
 
+#include "SfMWorker.h"
 
 QtGUI::QtGUI(QWidget *parent)
     : QWidget(parent)
@@ -158,27 +160,37 @@ void QtGUI::executeSFM()
         return;
     }
 
-    // 调用 SFM 重建函数
-    bool success = performSFMReconstruction(m_cameraIntrinsics, m_imageFolderPath, m_algorithm, m_save,
-        [this](const QString& message) {
-            appendToTextEdit(message);
-        });
-    if (success) {
+    QThread* thread = new QThread;
+    SfMWorker* worker = new SfMWorker();
+    worker->setParameters(m_cameraIntrinsics, m_imageFolderPath, m_algorithm, m_save); // 设置SfMWorker的参数
+    worker->moveToThread(thread);
+
+    connect(thread, &QThread::started, worker, &SfMWorker::process);
+    connect(worker, &SfMWorker::finished, thread, &QThread::quit);
+    connect(worker, &SfMWorker::finished, worker, &SfMWorker::deleteLater);
+    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+
+    connect(worker, &SfMWorker::finished, this, [this]() {
         QMessageBox::information(this, "成功", "SFM 稀疏点云重建完成");
-    }
-    else {
-        QMessageBox::critical(this, "错误", "SFM 重建失败");
-    }
+        });
+    connect(worker, &SfMWorker::error, this, [this](const QString& errorMessage) {
+        QMessageBox::critical(this, "SFM 重建错误", errorMessage);
+        });
+
+    connect(worker, &SfMWorker::logMessage, this, &QtGUI::appendToTextEdit);
+
+    thread->start();
 }
+
 
 void QtGUI::appendToTextEdit(const QString& text)
 {
     if (m_textedit) {
-        m_textedit->clear();  // 清除所有现有文本
-        m_textedit->setText(text);  // 设置新文本
-        m_textedit->repaint();  // 强制重绘
-        QCoreApplication::processEvents();
-        }
+        m_textedit->moveCursor(QTextCursor::End);
+        m_textedit->insertPlainText(text);
+        m_textedit->moveCursor(QTextCursor::End);
+        m_textedit->ensureCursorVisible();
+    }
 }
 
 AlgorithmDialog::AlgorithmDialog(QWidget* parent) : QDialog(parent)

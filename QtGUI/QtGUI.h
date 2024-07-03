@@ -1,17 +1,18 @@
 #pragma once
 
 #include <QtWidgets/QWidget>
-#include<QtWidgets/qmenu.h>
-#include "ui_QtGUI.h"
+#include <QtWidgets/qmenu.h>
+#include <ui_QtGUI.h>
 #include <QMenu>
 #include <QDialog>
-#include<QLineEdit>
-#include"sfm_reconstruction.h"
-#include<QLabel>
-#include<qtextedit.h>
-#include<QTextEdit>
+#include <QLineEdit>
+
+#include <QLabel>
+#include <qtextedit.h>
+#include <QTextEdit>
 #include <QComboBox>
 
+#include "SfMWorker.h"
 
 class QtGUI : public QWidget
 {
@@ -27,8 +28,8 @@ private:
     Ui::QtWidgetsApplication1Class ui;
     QTextEdit* m_textedit;
     QMenu* set_menu;
-    QString m_cameraIntrinsics;
-    QString m_imageFolderPath;
+    QString m_cameraIntrinsics = "2905.88;0;1416;0;2905.88;1064;0;0;1";
+    QString m_imageFolderPath = "D:\\Code\\VS2022\\repos\\3D-Reconstruction\\Main\\data\\openMVG_Castle";
     QString m_algorithm = "AKAZE_FLOAT";
     QString m_save = "ply";
     void executeSFM();
@@ -40,7 +41,6 @@ private slots:
     void show_set();
     void onAlgorithmSelected(const QString& algorithm);
     void onSaveSelected(const QString& Save);
-
 };
 
 class CameraDialog : public QDialog
