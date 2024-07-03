@@ -8,11 +8,11 @@
 #include <QObject>
 #include <QThread>
 
-class SfMWorker : public QObject {
+class MVSWorker : public QObject {
     Q_OBJECT
 
 public:
-    SfMWorker(QObject* parent = nullptr) : QObject(parent) {}
+    MVSWorker(QObject* parent = nullptr) : QObject(parent) {}
 
     void setParameters(const QString& cameraIntrinsics, const QString& imageFolderPath, const QString& algorithm, const QString& saveFormat) {
         this->cameraIntrinsics = cameraIntrinsics;
@@ -23,7 +23,7 @@ public:
 
 public slots:
     void process() {
-        bool success = performSfMReconstruction(cameraIntrinsics, imageFolderPath, algorithm, saveFormat,
+        bool success = performMVSReconstruction(cameraIntrinsics, imageFolderPath, algorithm, saveFormat,
             [this](const QString& message) {
                 emit logMessage(message);
             });
@@ -32,7 +32,7 @@ public slots:
             emit finished();
         }
         else {
-            emit error("SFM重建失败");
+            emit error("MVS 失败");
         }
     }
 
@@ -47,7 +47,7 @@ private:
     QString algorithm;
     QString saveFormat;
 
-    bool performSfMReconstruction(const QString& cameraIntrinsics,
+    bool performMVSReconstruction(const QString& cameraIntrinsics,
         const QString& imageFolderPath,
         const QString& algorithm,
         const QString& save,

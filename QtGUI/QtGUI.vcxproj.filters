@@ -39,9 +39,15 @@
     <ClCompile Include="SfMWorker.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MVSWorker.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="SfMWorker.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="MVSWorker.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

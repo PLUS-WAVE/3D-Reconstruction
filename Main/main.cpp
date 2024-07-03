@@ -183,7 +183,7 @@ int MAIN::start(std::string imagesInputDir, std::string kmatrix, std::string des
 		std::string densifyOutputFile = densifyOutputDir + "/scene_dense.mvs";
 	
 		const char* d_args[7];
-	
+
 		d_args[1] = "-i";
 		d_args[2] = (char*)densifyInputFile.data();
 		d_args[3] = "-o";

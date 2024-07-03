@@ -33,6 +33,7 @@ private:
     QString m_algorithm = "AKAZE_FLOAT";
     QString m_save = "ply";
     void executeSFM();
+    void executeMVS();
 private slots:
     void on1selected();
     void on2selected();

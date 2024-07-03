@@ -9,6 +9,7 @@
 #include <QStringConverter>
 
 #include "SfMWorker.h"
+#include "MVSWorker.h"
 
 QtGUI::QtGUI(QWidget *parent)
     : QWidget(parent)
@@ -29,6 +30,7 @@ void QtGUI::initializeUI()
     set_menu->addAction("选择保存格式", this, &QtGUI::on4selected);
     connect(set_button, &QPushButton::clicked, this, &QtGUI::show_set);
     connect(ui.sfm_button, &QPushButton::clicked, this, &QtGUI::executeSFM);
+	connect(ui.mvs_button, &QPushButton::clicked, this, &QtGUI::executeMVS);
     this->set_menu = set_menu;
     m_textedit = ui.textEdit;
   
@@ -182,6 +184,29 @@ void QtGUI::executeSFM()
     thread->start();
 }
 
+void QtGUI::executeMVS()
+{
+    QThread* thread = new QThread;
+    MVSWorker* worker = new MVSWorker();
+    worker->setParameters(m_cameraIntrinsics, m_imageFolderPath, m_algorithm, m_save);
+    worker->moveToThread(thread);
+
+    connect(thread, &QThread::started, worker, &MVSWorker::process);
+    connect(worker, &MVSWorker::finished, thread, &QThread::quit);
+    connect(worker, &MVSWorker::finished, worker, &MVSWorker::deleteLater);
+    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+
+    connect(worker, &MVSWorker::finished, this, [this]() {
+        QMessageBox::information(this, "成功", "MVS重建完成");
+        });
+    connect(worker, &MVSWorker::error, this, [this](const QString& errorMessage) {
+        QMessageBox::critical(this, "MVS 重建错误", errorMessage);
+        });
+
+    connect(worker, &MVSWorker::logMessage, this, &QtGUI::appendToTextEdit);
+
+    thread->start();
+}
 
 void QtGUI::appendToTextEdit(const QString& text)
 {

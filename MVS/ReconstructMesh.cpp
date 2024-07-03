@@ -36,10 +36,10 @@ bool Initialize_ReconstructMesh(size_t argc, LPCTSTR* argv)
 {
 	// Initialize_Dense log and console
 	CLOSE_LOGFILE();
-	CLOSE_LOGCONSOLE();
+	// CLOSE_LOGCONSOLE();
 	CLOSE_LOG();
 	OPEN_LOG();
-	OPEN_LOGCONSOLE();
+	// OPEN_LOGCONSOLE();
 
 	boost::program_options::options_description generic("Generic options");
 	generic.add_options()
