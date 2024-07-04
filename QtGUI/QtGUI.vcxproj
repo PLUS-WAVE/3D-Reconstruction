@@ -132,8 +132,8 @@
     <ProjectReference Include="..\Main\Main.vcxproj">
       <Project>{c486cf36-4126-48f0-b841-69933da9f027}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\Viewer\Viewer.vcxproj">
-      <Project>{c8b62bdd-87a4-40c0-91f3-0be40db2572c}</Project>
+    <ProjectReference Include="..\MVSViewer\MVSViewer.vcxproj">
+      <Project>{297bd98c-962f-4b4e-a18a-0d20a978c321}</Project>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

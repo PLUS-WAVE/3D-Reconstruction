@@ -14,8 +14,8 @@
 
 #include "SfMWorker.h"
 
-#include "../Viewer/Common.h"
-#include "../Viewer/Scene.h"
+#include "../MVSViewer/Common.h"
+#include "../MVSViewer/Scene.h"
 
 class QtGUI : public QWidget
 {

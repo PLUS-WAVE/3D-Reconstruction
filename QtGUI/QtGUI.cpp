@@ -22,7 +22,7 @@ QtGUI::QtGUI(QWidget *parent)
 QtGUI::~QtGUI()
 {
     CloseWindow(FindWindowA("GLFW30", "MVSViewer"));
-    // delete MVSViewer;
+    delete MVSViewer;
 }
 
 void QtGUI::initializeUI()
@@ -66,7 +66,7 @@ bool QtGUI::openViewer(QString fileName)
 {
     MVSViewer = new VIEWER::Scene();
 
-    if (!MVSViewer->Init(cv::Size(841, 421), _T("MVSViewer"), fileName.toStdString().c_str()), NULL)
+    if (!MVSViewer->Init(841, 421, _T("MVSViewer"), fileName.toStdString().c_str()), NULL)
     {
         return false;
     }
