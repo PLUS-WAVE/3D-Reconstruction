@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>883</width>
+    <width>911</width>
     <height>770</height>
    </rect>
   </property>
@@ -18,7 +18,7 @@
     <rect>
      <x>10</x>
      <y>-10</y>
-     <width>340</width>
+     <width>391</width>
      <height>61</height>
     </rect>
    </property>
@@ -45,9 +45,9 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="cloud_button">
+     <widget class="QPushButton" name="viewer_button">
       <property name="text">
-       <string>打开点云</string>
+       <string>自定义可视化</string>
       </property>
      </widget>
     </item>
@@ -56,18 +56,18 @@
   <widget class="QWidget" name="MainWidget" native="true">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>0</x>
      <y>50</y>
-     <width>861</width>
+     <width>911</width>
      <height>711</height>
     </rect>
    </property>
    <widget class="QTextEdit" name="textEdit">
     <property name="geometry">
      <rect>
-      <x>0</x>
+      <x>10</x>
       <y>440</y>
-      <width>861</width>
+      <width>891</width>
       <height>271</height>
      </rect>
     </property>
@@ -80,11 +80,51 @@
      <rect>
       <x>0</x>
       <y>10</y>
-      <width>861</width>
+      <width>901</width>
       <height>421</height>
      </rect>
     </property>
    </widget>
+  </widget>
+  <widget class="QWidget" name="horizontalLayoutWidget_2">
+   <property name="geometry">
+    <rect>
+     <x>510</x>
+     <y>-10</y>
+     <width>391</width>
+     <height>61</height>
+    </rect>
+   </property>
+   <layout class="QHBoxLayout" name="horizontalLayout_2">
+    <item>
+     <widget class="QPushButton" name="sfm_viewer">
+      <property name="text">
+       <string>显示SfM</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="mesh_viewer">
+      <property name="text">
+       <string>显示粗Mesh</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="refinemesh_viewer">
+      <property name="text">
+       <string>显示精Mesh</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="texture_viewer">
+      <property name="text">
+       <string>显示纹理</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

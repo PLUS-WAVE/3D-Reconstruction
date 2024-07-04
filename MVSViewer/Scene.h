@@ -33,7 +33,7 @@ namespace VIEWER {
 		__declspec(dllexport) ~Scene();
 
 		void Empty();
-		void Release();
+		__declspec(dllexport) void Release();
 		void ReleasePointCloud();
 		void ReleaseMesh();
 		inline bool IsValid() const { return window.IsValid(); }

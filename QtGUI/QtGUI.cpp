@@ -17,12 +17,13 @@ QtGUI::QtGUI(QWidget *parent)
 {
     ui.setupUi(this);
     std::thread(&QtGUI::init_thread, this).detach();
+    this->setAttribute(Qt::WA_DeleteOnClose);
 }
 
 QtGUI::~QtGUI()
 {
-    CloseWindow(FindWindowA("GLFW30", "MVSViewer"));
-    delete MVSViewer;
+    // CloseWindow(FindWindowA("GLFW30", "MVSViewer"));
+    // delete MVSViewer;
 }
 
 void QtGUI::initializeUI()
@@ -36,7 +37,7 @@ void QtGUI::initializeUI()
     connect(set_button, &QPushButton::clicked, this, &QtGUI::show_set);
     connect(ui.sfm_button, &QPushButton::clicked, this, &QtGUI::executeSFM);
 	connect(ui.mvs_button, &QPushButton::clicked, this, &QtGUI::executeMVS);
-    connect(ui.cloud_button, &QPushButton::clicked, this, &QtGUI::oncloud_button_clicked);
+    connect(ui.viewer_button, &QPushButton::clicked, this, &QtGUI::oncloud_button_clicked);
     this->set_menu = set_menu;
     m_textedit = ui.textEdit;
 
@@ -46,13 +47,12 @@ void QtGUI::oncloud_button_clicked()
 {
     if (MVSViewer == nullptr)
     {
-        openViewer("scene_dense_mesh_refine_texture.ply");
+        openViewer("");
         return;
     }
     QString fileName = QFileDialog::getOpenFileName(NULL, "Viewer", ".",
         "MVS Format(*.mvs);;Stanford Polygon File Format(*.ply);;Alias Wavefront Object(*.obj);;All Files(*.*)");
     if (fileName == "") return;
-    // J3DFile = Jutil::SparseFileName(fileName.toStdString());
     if (ViewerAvailable == false)
     {
         openViewer(fileName);
@@ -66,7 +66,7 @@ bool QtGUI::openViewer(QString fileName)
 {
     MVSViewer = new VIEWER::Scene();
 
-    if (!MVSViewer->Init(841, 421, _T("MVSViewer"), fileName.toStdString().c_str()), NULL)
+    if (!MVSViewer->Init(890, 421, _T("MVSViewer"), fileName.toStdString().c_str()), NULL)
     {
         return false;
     }
@@ -74,7 +74,7 @@ bool QtGUI::openViewer(QString fileName)
     delete this->ui.ViewerWidget;
     ui.ViewerWidget = new Viewer(1, this->ui.MainWidget);
     ui.ViewerWidget->setObjectName(QString::fromUtf8("MVSViewer"));
-    ui.ViewerWidget->setGeometry(QRect(10, 10, 841, 421));
+    ui.ViewerWidget->setGeometry(QRect(10, 5, 890, 421));
     ui.ViewerWidget->show();
     ui.ViewerWidget->update();
     MVSViewer->window.SetVisible(true);

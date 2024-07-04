@@ -45,7 +45,7 @@ private:
 
     void init_thread()
     {
-        emit(this->ui.cloud_button->clicked());
+        emit(this->ui.viewer_button->clicked());
     }
 
 private slots:
