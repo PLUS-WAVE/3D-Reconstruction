@@ -134,9 +134,7 @@
   <ItemGroup>
     <ClInclude Include="Camera.h" />
     <ClInclude Include="Common.h" />
-    <ClInclude Include="framework.h" />
     <ClInclude Include="Image.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Window.h" />
   </ItemGroup>
