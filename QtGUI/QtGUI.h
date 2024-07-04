@@ -35,6 +35,10 @@ private:
     QString m_imageFolderPath = "D:\\Code\\VS2022\\repos\\3D-Reconstruction\\Main\\data\\openMVG_Castle";
     QString m_algorithm = "AKAZE_FLOAT";
     QString m_save = "ply";
+
+    VIEWER::Scene* MVSViewer;
+
+    bool openViewer(QString fileName);
     void executeSFM();
     void executeMVS();
 private slots:

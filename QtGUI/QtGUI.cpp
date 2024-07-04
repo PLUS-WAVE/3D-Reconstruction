@@ -10,6 +10,7 @@
 
 #include "SfMWorker.h"
 #include "MVSWorker.h"
+#include "Viewer.h"
 
 QtGUI::QtGUI(QWidget *parent)
     : QWidget(parent)
@@ -18,7 +19,10 @@ QtGUI::QtGUI(QWidget *parent)
 }
 
 QtGUI::~QtGUI()
-{}
+{
+    CloseWindow(FindWindowA("GLFW30", "MVSViewer"));
+    delete MVSViewer;
+}
 
 void QtGUI::initializeUI()
 {
@@ -31,10 +35,34 @@ void QtGUI::initializeUI()
     connect(set_button, &QPushButton::clicked, this, &QtGUI::show_set);
     connect(ui.sfm_button, &QPushButton::clicked, this, &QtGUI::executeSFM);
 	connect(ui.mvs_button, &QPushButton::clicked, this, &QtGUI::executeMVS);
+    connect(ui.cloud_button, &QPushButton::clicked, this, [this]() {
+		openViewer("scene_dense_mesh_refine_texture.ply");
+		});
     this->set_menu = set_menu;
     m_textedit = ui.textEdit;
-  
 
+}
+
+bool QtGUI::openViewer(QString fileName)
+{
+    MVSViewer = new VIEWER::Scene();
+
+    if (!MVSViewer->Init(cv::Size(841, 421), _T("MVSViewer"), fileName.toStdString().c_str()))
+    {
+        return false;
+    }
+
+    delete this->ui.ViewerWidget;
+    ui.ViewerWidget = new Viewer(1, this->ui.MainWidget);
+    // ui.ViewerWidget->setObjectName(QString::fromUtf8("MVSViewer"));
+    ui.ViewerWidget->setGeometry(QRect(10, 10, 841, 421));
+    ui.ViewerWidget->show();
+    ui.ViewerWidget->update();
+    MVSViewer->window.SetVisible(true);
+
+    MVSViewer->Loop();
+
+    return true;
 }
 
 void QtGUI::show_set()

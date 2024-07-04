@@ -43,7 +43,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'" Label="QtSettings">
     <QtInstall>6.7.2_msvc2019_64</QtInstall>
-    <QtModules>core;gui;widgets;printsupport;designer</QtModules>
+    <QtModules>core;gui;widgets;designer</QtModules>
     <QtBuildConfig>release</QtBuildConfig>
   </PropertyGroup>
   <Target Name="QtMsBuildNotFound" BeforeTargets="CustomBuild;ClCompile" Condition="!Exists('$(QtMsBuild)\qt.targets') or !Exists('$(QtMsBuild)\qt.props')">
@@ -63,6 +63,8 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <IncludePath>D:\dev\NVIDIA GPU Computing Toolkit\CUDA\v12.5\include;$(IncludePath)</IncludePath>
+    <LibraryPath>D:\dev\NVIDIA GPU Computing Toolkit\CUDA\v12.5\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Link>
@@ -81,6 +83,9 @@
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>cudart.lib;cuda.lib;%(AdditionalDependencies);$(Qt_LIBS_)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
@@ -113,6 +118,7 @@
   <ItemGroup>
     <ClCompile Include="MVSWorker.cpp" />
     <ClCompile Include="SfMWorker.cpp" />
+    <ClCompile Include="Viewer.cpp" />
     <QtRcc Include="QtGUI.qrc" />
     <QtUic Include="QtGUI.ui" />
     <QtMoc Include="QtGUI.h" />
@@ -132,6 +138,9 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MVSWorker.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <QtMoc Include="Viewer.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

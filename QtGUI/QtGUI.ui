@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>QtWidgetsApplication1</string>
+   <string>三维重建平台</string>
   </property>
   <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
@@ -53,21 +53,49 @@
     </item>
    </layout>
   </widget>
-  <widget class="QTextEdit" name="textEdit">
+  <widget class="QWidget" name="MainWidget" native="true">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>490</y>
+     <y>50</y>
      <width>861</width>
-     <height>271</height>
+     <height>711</height>
     </rect>
    </property>
-   <property name="readOnly">
-    <bool>true</bool>
-   </property>
+   <widget class="QTextEdit" name="textEdit">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>440</y>
+      <width>861</width>
+      <height>271</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="Viewer" name="ViewerWidget" native="true">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>10</y>
+      <width>861</width>
+      <height>421</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>Viewer</class>
+   <extends>QWidget</extends>
+   <header>Viewer.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="QtGUI.qrc"/>
  </resources>

@@ -279,7 +279,7 @@ bool Scene::Open(LPCTSTR fileName, LPCTSTR meshFileName)
 		center == Point3d::INF ? Point3d(bounds.GetCenter()) : center,
 		images.size()<2?1.f:(float)imageBounds.EnlargePercent(REAL(1)/images.size()).GetSize().norm()));
 	window.camera.maxCamID = images.size();
-	window.SetName(String::FormatString((name + _T(": %s")).c_str(), Util::getFileName(fileName).c_str()));
+	window.SetName(String::FormatString(name));
 	window.clbkSaveScene = DELEGATEBINDCLASS(Window::ClbkSaveScene, &Scene::Save, this);
 	window.clbkExportScene = DELEGATEBINDCLASS(Window::ClbkExportScene, &Scene::Export, this);
 	window.clbkCenterScene = DELEGATEBINDCLASS(Window::ClbkCenterScene, &Scene::Center, this);
