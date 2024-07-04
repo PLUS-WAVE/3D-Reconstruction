@@ -26,13 +26,14 @@ public:
     ~QtGUI();
     void appendToTextEdit(const QString& text);
     void initializeUI();
+    void auto_viewer(const QString& filename);
 
 private:
     Ui::QtWidgetsApplication1Class ui;
     QTextEdit* m_textedit;
     QMenu* set_menu;
     QString m_cameraIntrinsics = "2905.88;0;1416;0;2905.88;1064;0;0;1";
-    QString m_imageFolderPath = "D:\\Code\\VS2022\\repos\\3D-Reconstruction\\Main\\data\\openMVG_Castle";
+    QString m_imageFolderPath = "D:/Code/VS2022/repos/3D-Reconstruction/Main/data/openMVG_Castle";
     QString m_algorithm = "AKAZE_FLOAT";
     QString m_save = "ply";
 
@@ -43,11 +44,6 @@ private:
     void executeSFM();
     void executeMVS();
 
-    void init_thread()
-    {
-        emit(this->ui.viewer_button->clicked());
-    }
-
 private slots:
     void on1selected();
     void on2selected();
@@ -57,7 +53,7 @@ private slots:
     void onAlgorithmSelected(const QString& algorithm);
     void onSaveSelected(const QString& Save);
 
-    void oncloud_button_clicked();
+    void on_viewer_button_clicked();
 };
 
 class CameraDialog : public QDialog

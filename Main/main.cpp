@@ -28,6 +28,46 @@ void CopyRelevantFiles(const std::string& sourceDirectory, const std::string& de
 	}
 }
 
+bool folder_copy(const std::string& source_folder, const std::string& destination_folder, bool overwrite = true) {
+	// 检查源文件夹是否存在
+	if (!stlplus::folder_exists(source_folder)) {
+		std::cerr << "源文件夹不存在: " << source_folder << std::endl;
+		return false;
+	}
+
+	// 如果目标文件夹不存在，则创建它
+	if (!stlplus::folder_exists(destination_folder)) {
+		if (!stlplus::folder_create(destination_folder)) {
+			std::cerr << "无法创建目标文件夹: " << destination_folder << std::endl;
+			return false;
+		}
+	}
+
+	// 获取源文件夹中的所有文件和子文件夹
+	std::vector<std::string> files = stlplus::folder_files(source_folder);
+	std::vector<std::string> subdirectories = stlplus::folder_subdirectories(source_folder);
+
+	// 复制所有文件
+	for (const std::string& file : files) {
+		std::string source_file = stlplus::create_filespec(source_folder, file);
+		std::string destination_file = stlplus::create_filespec(destination_folder, file);
+		if (!stlplus::file_copy(source_file, destination_file)) {
+			return false;
+		}
+	}
+
+	// 递归复制所有子文件夹
+	for (const std::string& subdirectory : subdirectories) {
+		std::string source_subdirectory = stlplus::folder_down(source_folder, subdirectory);
+		std::string destination_subdirectory = stlplus::folder_down(destination_folder, subdirectory);
+		if (!folder_copy(source_subdirectory, destination_subdirectory, overwrite)) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
 int MAIN::start(std::string imagesInputDir, std::string kmatrix, std::string describerMethod,
                 std::string finalExportFormat, int task)
 {
@@ -46,6 +86,19 @@ int MAIN::start(std::string imagesInputDir, std::string kmatrix, std::string des
 	std::string textureMeshOutputDir = MVSOutputDir + "/TextureMesh";
 
 	std::string finalExportDir = resultOutputDir + "/FinalExport";
+
+	std::string densifyInputFile = MVSOutputDir + "/sfm_scene.mvs";
+	std::string densifyOutputFile = densifyOutputDir + "/scene_dense.mvs";
+
+	std::string reconstructMeshInputFile = densifyOutputDir + "/scene_dense.mvs";
+	std::string reconstructMeshOutputFile = reconstructMeshOutputDir + "/scene_dense_mesh.mvs";
+
+	std::string refineMeshInputFile = reconstructMeshOutputDir + "/scene_dense_mesh.mvs";
+	std::string refineMeshOutputFile = refineMeshOutputDir + "/scene_dense_mesh_refine.mvs";
+
+	std::string textureMeshInputFile = refineMeshOutputDir + "/scene_dense_mesh_refine.mvs";
+	std::string textureMeshOutputFile = textureMeshOutputDir + "/scene_dense_mesh_refine_texture.mvs";
+
 
 	switch (task)
 	{
@@ -177,10 +230,7 @@ int MAIN::start(std::string imagesInputDir, std::string kmatrix, std::string des
 			}
 		}
 	
-		stlplus::folder_rename(MVSOutputDir + "/undistorted_images", densifyOutputDir + "/undistorted_images");
-	
-		std::string densifyInputFile = MVSOutputDir + "/sfm_scene.mvs";
-		std::string densifyOutputFile = densifyOutputDir + "/scene_dense.mvs";
+		folder_copy(MVSOutputDir + "/undistorted_images", densifyOutputDir + "/undistorted_images");
 	
 		const char* d_args[7];
 
@@ -191,7 +241,10 @@ int MAIN::start(std::string imagesInputDir, std::string kmatrix, std::string des
 		d_args[5] = "-w";
 		d_args[6] = (char*)densifyOutputDir.data();
 		MVSUSE::DensifyPointCloud(7, d_args);
-	
+
+		break;
+
+	case 2:
 		std::cout
 			<< "\n-----------------------------------------------------------"
 			<< "\n Reconstruct Mesh:"
@@ -207,10 +260,7 @@ int MAIN::start(std::string imagesInputDir, std::string kmatrix, std::string des
 			}
 		}
 	
-		stlplus::folder_rename(densifyOutputDir + "/undistorted_images", reconstructMeshOutputDir + "/undistorted_images");
-	
-		std::string reconstructMeshInputFile = densifyOutputDir + "/scene_dense.mvs";
-		std::string reconstructMeshOutputFile = reconstructMeshOutputDir + "/scene_dense_mesh.mvs";
+		folder_copy(densifyOutputDir + "/undistorted_images", reconstructMeshOutputDir + "/undistorted_images");
 	
 		const char* m_args[7];
 	
@@ -221,7 +271,10 @@ int MAIN::start(std::string imagesInputDir, std::string kmatrix, std::string des
 		m_args[5] = "-w";
 		m_args[6] = (char*)reconstructMeshOutputDir.data();
 		MVSUSE::ReconstructMesh(7, m_args);
-	
+
+		break;
+
+	case 3:
 		std::cout
 			<< "\n-----------------------------------------------------------"
 			<< "\n Refine Mesh:"
@@ -237,10 +290,7 @@ int MAIN::start(std::string imagesInputDir, std::string kmatrix, std::string des
 			}
 		}
 	
-		stlplus::folder_rename(reconstructMeshOutputDir + "/undistorted_images", refineMeshOutputDir + "/undistorted_images");
-	
-		std::string refineMeshInputFile = reconstructMeshOutputDir + "/scene_dense_mesh.mvs";
-		std::string refineMeshOutputFile = refineMeshOutputDir + "/scene_dense_mesh_refine.mvs";
+		folder_copy(reconstructMeshOutputDir + "/undistorted_images", refineMeshOutputDir + "/undistorted_images");
 	
 		const char* r_args[7];
 	
@@ -251,7 +301,10 @@ int MAIN::start(std::string imagesInputDir, std::string kmatrix, std::string des
 		r_args[5] = "-w";
 		r_args[6] = (char*)refineMeshOutputDir.data();
 		MVSUSE::RefineMesh(7, r_args);
-	
+
+		break;
+
+	case 4:
 		std::cout
 			<< "\n-----------------------------------------------------------"
 			<< "\n Texture Mesh:"
@@ -267,10 +320,7 @@ int MAIN::start(std::string imagesInputDir, std::string kmatrix, std::string des
 			}
 		}
 	
-		stlplus::folder_rename(refineMeshOutputDir + "/undistorted_images", textureMeshOutputDir + "/undistorted_images");
-	
-		std::string textureMeshInputFile = refineMeshOutputDir + "/scene_dense_mesh_refine.mvs";
-		std::string textureMeshOutputFile = textureMeshOutputDir + "/scene_dense_mesh_refine_texture.mvs";
+		folder_copy(refineMeshOutputDir + "/undistorted_images", textureMeshOutputDir + "/undistorted_images");
 	
 		const char* t_args[9];
 	

@@ -4,6 +4,7 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QFileInfo> 
 #include <QVariant>
 #include <QCoreApplication>
 #include <QStringConverter>
@@ -16,7 +17,6 @@ QtGUI::QtGUI(QWidget *parent)
     : QWidget(parent)
 {
     ui.setupUi(this);
-    std::thread(&QtGUI::init_thread, this).detach();
     this->setAttribute(Qt::WA_DeleteOnClose);
 }
 
@@ -37,22 +37,22 @@ void QtGUI::initializeUI()
     connect(set_button, &QPushButton::clicked, this, &QtGUI::show_set);
     connect(ui.sfm_button, &QPushButton::clicked, this, &QtGUI::executeSFM);
 	connect(ui.mvs_button, &QPushButton::clicked, this, &QtGUI::executeMVS);
-    connect(ui.viewer_button, &QPushButton::clicked, this, &QtGUI::oncloud_button_clicked);
+    connect(ui.viewer_button, &QPushButton::clicked, this, &QtGUI::on_viewer_button_clicked);
     this->set_menu = set_menu;
     m_textedit = ui.textEdit;
 
 }
 
-void QtGUI::oncloud_button_clicked()
+void QtGUI::on_viewer_button_clicked()
 {
-    if (MVSViewer == nullptr)
-    {
-        openViewer("");
-        return;
-    }
     QString fileName = QFileDialog::getOpenFileName(NULL, "Viewer", ".",
         "MVS Format(*.mvs);;Stanford Polygon File Format(*.ply);;Alias Wavefront Object(*.obj);;All Files(*.*)");
-    if (fileName == "") return;
+
+	if (fileName == "") 
+    {
+        return;
+    }
+
     if (ViewerAvailable == false)
     {
         openViewer(fileName);
@@ -223,6 +223,10 @@ void QtGUI::executeSFM()
     connect(worker, &SfMWorker::finished, this, [this]() {
         QMessageBox::information(this, "成功", "SFM 稀疏点云重建完成");
         });
+    QString filename = m_imageFolderPath + "/Output/MVS_Output/sfm_scene.mvs";
+    connect(worker, &SfMWorker::finished, this, [this, filename]() {
+        this->auto_viewer(filename);
+        });
     connect(worker, &SfMWorker::error, this, [this](const QString& errorMessage) {
         QMessageBox::critical(this, "SFM 重建错误", errorMessage);
         });
@@ -232,17 +236,39 @@ void QtGUI::executeSFM()
     thread->start();
 }
 
+void QtGUI::auto_viewer(const QString& filename)
+{
+    if (filename == "") return;
+    if (ViewerAvailable == false)
+    {
+        openViewer(filename);
+        return;
+    }
+    MVSViewer->window.NewModel(filename.toStdString());
+}
+
 void QtGUI::executeMVS()
 {
+    // 构建sfm_scene.mvs文件的完整路径
+    QString sfmScenePath = m_imageFolderPath + "/Output/MVS_Output/sfm_scene.mvs";
+    QFileInfo checkFile(sfmScenePath);
+
+    if (!checkFile.exists() || !checkFile.isFile()) {
+        QMessageBox::warning(this, "错误", "未找到SfM结果，请先执行SfM");
+        return;
+    }
+
     QThread* thread = new QThread;
     MVSWorker* worker = new MVSWorker();
-    worker->setParameters(m_cameraIntrinsics, m_imageFolderPath, m_algorithm, m_save);
+    worker->setParameters(m_cameraIntrinsics, m_imageFolderPath, m_algorithm, m_save, this);
     worker->moveToThread(thread);
 
     connect(thread, &QThread::started, worker, &MVSWorker::process);
     connect(worker, &MVSWorker::finished, thread, &QThread::quit);
     connect(worker, &MVSWorker::finished, worker, &MVSWorker::deleteLater);
     connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+
+    connect(worker, &MVSWorker::updateViewer, this, &QtGUI::auto_viewer);
 
     connect(worker, &MVSWorker::finished, this, [this]() {
         QMessageBox::information(this, "成功", "MVS重建完成");

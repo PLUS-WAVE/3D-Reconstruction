@@ -19,7 +19,7 @@ protected:
     }
 };
 
-bool MVSWorker::performMVSReconstruction(const QString& cameraIntrinsics, const QString& imageFolderPath, const QString& algorithm, const QString& save, const std::function<void(const QString&)>& logCallback)
+bool MVSWorker::performMVSReconstruction(const QString& cameraIntrinsics, const QString& imageFolderPath, const QString& algorithm, const QString& save, QtGUI* GUI, const std::function<void(const QString&)>& logCallback)
 {
     auto coutBuf = std::cout.rdbuf();
     auto cerrBuf = std::cerr.rdbuf();
@@ -36,14 +36,41 @@ bool MVSWorker::performMVSReconstruction(const QString& cameraIntrinsics, const 
 
     if (MAIN::start(imageFolderPath.toStdString(), cameraIntrinsics.toStdString(), algorithm.toStdString(), save.toStdString(), 1))
     {
-        logCallback("MVS 失败");
+        logCallback("MVS Reconstruct Mesh 失败");
         return false;
     }
-    logCallback("MVS 成功");
+    logCallback("MVS Reconstruct Mesh 成功");
 
+    emit updateViewer(QString::fromStdString(imageFolderPath.toStdString() + "/Output/MVS_Output/Densify/scene_dense.mvs"));
 
-    // �ָ�ԭʼbuf
-    std::cout.rdbuf(coutBuf);
+    if (MAIN::start(imageFolderPath.toStdString(), cameraIntrinsics.toStdString(), algorithm.toStdString(), save.toStdString(), 2))
+    {
+        logCallback("MVS Reconstruct Mesh 失败");
+        return false;
+    }
+    logCallback("MVS Reconstruct Mesh 成功");
+
+    emit updateViewer(QString::fromStdString(imageFolderPath.toStdString() + "/Output/MVS_Output/Mesh/scene_dense_mesh.mvs"));
+
+    if (MAIN::start(imageFolderPath.toStdString(), cameraIntrinsics.toStdString(), algorithm.toStdString(), save.toStdString(), 3))
+    {
+        logCallback("MVS Refine Mesh 失败");
+        return false;
+    }
+    logCallback("MVS Refine Mesh 成功");
+
+    emit updateViewer(QString::fromStdString(imageFolderPath.toStdString() + "/Output/MVS_Output/RefineMesh/scene_dense_mesh_refine.mvs"));
+
+	if (MAIN::start(imageFolderPath.toStdString(), cameraIntrinsics.toStdString(), algorithm.toStdString(), save.toStdString(), 4))
+    {
+        logCallback("MVS Texture Mesh 失败");
+        return false;
+    }
+    logCallback("MVS Texture Mesh 成功");
+
+    emit updateViewer(QString::fromStdString(imageFolderPath.toStdString() + "/Output/MVS_Output/TextureMesh/scene_dense_mesh_refine_texture.mvs"));
+
+	std::cout.rdbuf(coutBuf);
     std::cerr.rdbuf(cerrBuf);
 
     return true;
