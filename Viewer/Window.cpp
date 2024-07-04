@@ -455,4 +455,16 @@ bool Window::IsAltKeyPressed() const
 		glfwGetKey(window, GLFW_KEY_LEFT_ALT) == GLFW_PRESS ||
 		glfwGetKey(window, GLFW_KEY_RIGHT_ALT) == GLFW_PRESS;
 }
+
+void Window::NewModel(const std::string& fn)
+{
+	if (clbkOpenScene)
+	{
+		SetVisible(false);
+		String fileName(fn);
+		Util::ensureUnifySlash(fileName);
+		clbkOpenScene(fileName, NULL);
+		SetVisible(true);
+	}
+}
 /*----------------------------------------------------------------*/

@@ -36,11 +36,18 @@ private:
     QString m_algorithm = "AKAZE_FLOAT";
     QString m_save = "ply";
 
-    VIEWER::Scene* MVSViewer;
+    VIEWER::Scene* MVSViewer = nullptr;
+    bool ViewerAvailable = false;
 
     bool openViewer(QString fileName);
     void executeSFM();
     void executeMVS();
+
+    void init_thread()
+    {
+        emit(this->ui.cloud_button->clicked());
+    }
+
 private slots:
     void on1selected();
     void on2selected();
@@ -49,6 +56,8 @@ private slots:
     void show_set();
     void onAlgorithmSelected(const QString& algorithm);
     void onSaveSelected(const QString& Save);
+
+    void oncloud_button_clicked();
 };
 
 class CameraDialog : public QDialog

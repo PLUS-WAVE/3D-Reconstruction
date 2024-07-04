@@ -124,6 +124,8 @@ public:
 	void Drop(int count, const char** paths);
 	static void Drop(GLFWwindow* window, int count, const char** paths);
 
+	void NewModel(const std::string& fn);
+
 protected:
 	bool IsShiftKeyPressed() const;
 	bool IsCtrlKeyPressed() const;
