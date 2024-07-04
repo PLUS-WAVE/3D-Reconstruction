@@ -30,7 +30,7 @@ void QtGUI::initializeUI()
 {
     QPushButton* set_button = ui.set_button;
     QMenu* set_menu = new QMenu(this);
-    set_menu->addAction("选择摄像机", this, &QtGUI::on1selected);
+    set_menu->addAction("选择相机内参", this, &QtGUI::on1selected);
     set_menu->addAction("选择图片路径", this, &QtGUI::on2selected);
     set_menu->addAction("选择匹配算法", this, &QtGUI::on3selected);
     set_menu->addAction("选择保存格式", this, &QtGUI::on4selected);
@@ -230,7 +230,7 @@ QString CameraDialog::validateKMatrix(const QString& kMatrixString)
     for (const QString& part : parts) {
         double value = part.toDouble(&ok);
         if (!ok) {
-            return "K矩阵包含非数字字符";
+            return "K矩阵包含非数字字符（如逗号）";
         }
         kMatrixValues.append(value);
     }
@@ -341,7 +341,7 @@ void QtGUI::executeMVS()
     connect(worker, &MVSWorker::updateViewer, this, &QtGUI::auto_viewer);
 
     connect(worker, &MVSWorker::finished, this, [this]() {
-        QMessageBox::information(this, "成功", "MVS重建完成");
+        QMessageBox::information(this, "成功", "MVS重建完成：最终输出在" + m_imageFolderPath + "/Output/FinalExport");
         });
     connect(worker, &MVSWorker::error, this, [this](const QString& errorMessage) {
         QMessageBox::critical(this, "MVS 重建错误", errorMessage);
@@ -370,10 +370,9 @@ AlgorithmDialog::AlgorithmDialog(QWidget* parent) : QDialog(parent)
     algorithmComboBox = new QComboBox(this);
     confirmButton = new QPushButton("确认", this);
 
-    // 添加算法选项
-    algorithmComboBox->addItem("SIFT_ANATOMY");
     algorithmComboBox->addItem("AKAZE_FLOAT");
     algorithmComboBox->addItem("AKAZE_MLDB");
+    algorithmComboBox->addItem("SIFT_ANATOMY");
 
     layout->addWidget(new QLabel("选择匹配算法：", this));
     layout->addWidget(algorithmComboBox);

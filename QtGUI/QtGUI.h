@@ -32,8 +32,8 @@ private:
     Ui::QtWidgetsApplication1Class ui;
     QTextEdit* m_textedit;
     QMenu* set_menu;
-    QString m_cameraIntrinsics = "2905.88;0;1416;0;2905.88;1064;0;0;1";
-    QString m_imageFolderPath = "D:/Code/VS2022/repos/3D-Reconstruction/Main/data/openMVG_Castle";
+    QString m_cameraIntrinsics;
+	QString m_imageFolderPath;
     QString m_algorithm = "AKAZE_FLOAT";
     QString m_save = "ply";
 
