@@ -248,16 +248,11 @@ bool Scene::Init(int width, int height, LPCTSTR windowName, LPCTSTR fileName, LP
 		return false;
 	name = windowName;
 	window.clbkOpenScene = DELEGATEBINDCLASS(Window::ClbkOpenScene, &Scene::Open, this);
-	// window.clbkExportScene = DELEGATEBINDCLASS(Window::ClbkExportScene, &Scene::Export, this);
-	window.clbkRayScene = DELEGATEBINDCLASS(Window::ClbkRayScene, &Scene::CastRay, this);
-	window.clbkCompilePointCloud = DELEGATEBINDCLASS(Window::ClbkCompilePointCloud, &Scene::CompilePointCloud, this);
-	window.clbkCompileMesh = DELEGATEBINDCLASS(Window::ClbkCompileMesh, &Scene::CompileMesh, this);
 
 	// init OpenGL
 	glPolygonMode(GL_FRONT, GL_FILL);
 	glEnable(GL_DEPTH_TEST);
-	//glClearColor(0.f, 0.5f, 0.9f, 1.f);
-	glClearColor(0.9019f, 0.9019f, 0.9821f, 0);
+	glClearColor(0.39f, 0.39f, 0.784f, 1.f);
 	static const float light0_ambient[] = { 0.1f, 0.1f, 0.1f, 1.0f };
 	static const float light0_diffuse[] = { 1.0f, 1.0f, 1.0f, 1.0f };
 	static const float light0_position[] = { 0.0f, 0.0f, 1000.0f, 0.0f };
@@ -351,6 +346,13 @@ bool Scene::Open(LPCTSTR fileName, LPCTSTR meshFileName)
 	// init camera
 	window.SetCamera(CameraPtr(new Camera(bounds)));
 	window.camera->maxCamID = images.size();
+
+	window.clbkCompilePointCloud = DELEGATEBINDCLASS(Window::ClbkCompilePointCloud, &Scene::CompilePointCloud, this);
+	window.clbkCompileMesh = DELEGATEBINDCLASS(Window::ClbkCompileMesh, &Scene::CompileMesh, this);
+
+	if (!scene.IsEmpty())
+		window.clbkRayScene = DELEGATEBINDCLASS(Window::ClbkRayScene, &Scene::CastRay, this);
+
 	window.Reset(MINF(2u, images.size()));
 	return true;
 }
@@ -404,7 +406,7 @@ void Scene::CompilePointCloud()
 	if (!scene.pointcloud.IsEmpty() && (window.sparseType&Window::SPR_POINTS) != 0) {
 		ASSERT_ARE_SAME_TYPE(float, MVS::PointCloud::Point::Type);
 		glBegin(GL_POINTS);
-		glColor3f(0.5, 0.5, 0.5);
+		glColor3f(1.f, 1.f, 1.f);
 		FOREACH(i, scene.pointcloud.points) {
 			if (!scene.pointcloud.pointViews.IsEmpty() &&
 				scene.pointcloud.pointViews[i].size() < window.minViews)
@@ -426,21 +428,27 @@ void Scene::CompileMesh()
 	if (scene.mesh.IsEmpty())
 		return;
 	ReleaseMesh();
+	if (scene.mesh.faceNormals.empty())
+		scene.mesh.ComputeNormalFaces();
+	// translate, normalize and flip Y axis of the texture coordinates
+	MVS::Mesh::TexCoordArr normFaceTexcoords;
+	if (scene.mesh.HasTexture())
+		scene.mesh.FaceTexcoordsNormalize(normFaceTexcoords, true);
 	listMesh = glGenLists(1);
 	glNewList(listMesh, GL_COMPILE);
 	// compile mesh
 	ASSERT_ARE_SAME_TYPE(float, MVS::Mesh::Vertex::Type);
 	ASSERT_ARE_SAME_TYPE(float, MVS::Mesh::Normal::Type);
 	ASSERT_ARE_SAME_TYPE(float, MVS::Mesh::TexCoord::Type);
-	glColor3f(1, 1, 1);
+	glColor3f(1.f, 1.f, 1.f);
 	glBegin(GL_TRIANGLES);
 	FOREACH(i, scene.mesh.faces) {
 		const MVS::Mesh::Face& face = scene.mesh.faces[i];
 		const MVS::Mesh::Normal& n = scene.mesh.faceNormals[i];
 		glNormal3fv(n.ptr());
 		for (int j = 0; j < 3; ++j) {
-			if (!scene.mesh.faceTexcoords.IsEmpty() && window.bRenderTexture) {
-				const MVS::Mesh::TexCoord& t = scene.mesh.faceTexcoords[i * 3 + j];
+			if (!normFaceTexcoords.empty() && window.bRenderTexture) {
+				const MVS::Mesh::TexCoord& t = normFaceTexcoords[i * 3 + j];
 				glTexCoord2fv(t.ptr());
 			}
 			const MVS::Mesh::Vertex& p = scene.mesh.vertices[face[j]];
