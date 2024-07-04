@@ -98,7 +98,7 @@ public:
 	bool Init(const cv::Size&, LPCTSTR name);
 	void SetCamera(const Camera&);
 	void SetName(LPCTSTR);
-	void SetVisible(bool);
+	__declspec(dllexport) void SetVisible(bool);
 	bool IsVisible() const;
 	void Reset(SPARSE sparseType=SPR_ALL, unsigned minViews=2);
 
@@ -124,7 +124,7 @@ public:
 	void Drop(int count, const char** paths);
 	static void Drop(GLFWwindow* window, int count, const char** paths);
 
-	void NewModel(const std::string& fn);
+	__declspec(dllexport) void NewModel(const std::string& fn);
 
 protected:
 	bool IsShiftKeyPressed() const;

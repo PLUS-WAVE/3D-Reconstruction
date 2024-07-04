@@ -42,8 +42,8 @@ public:
 	static SEACAVE::Thread thread; // worker thread
 
 public:
-	Scene();
-	~Scene();
+	__declspec(dllexport) Scene();
+	__declspec(dllexport) ~Scene();
 
 	void Empty();
 	void Release();
@@ -53,7 +53,7 @@ public:
 	inline bool IsOpen() const { return IsValid() && !scene.IsEmpty(); }
 	inline bool IsOctreeValid() const { return !octPoints.IsEmpty() || !octMesh.IsEmpty(); }
 
-	bool Init(const cv::Size&, LPCTSTR windowName, LPCTSTR fileName=NULL, LPCTSTR meshFileName=NULL);
+	__declspec(dllexport) bool Init(const cv::Size&, LPCTSTR windowName, LPCTSTR fileName=NULL, LPCTSTR meshFileName=NULL);
 	bool Open(LPCTSTR fileName, LPCTSTR meshFileName=NULL);
 	bool Save(LPCTSTR fileName=NULL, bool bRescaleImages=false);
 	bool Export(LPCTSTR fileName, LPCTSTR exportType=NULL) const;
@@ -61,8 +61,10 @@ public:
 	void CompileMesh();
 	void CompileBounds();
 
+	void ProcessEvents();
+
 	void Draw();
-	void Loop();
+	__declspec(dllexport) void Loop();
 
 	void Center();
 	void TogleSceneBox();

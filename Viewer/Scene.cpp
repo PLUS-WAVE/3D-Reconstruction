@@ -107,11 +107,11 @@ void Scene::Empty()
 	ReleasePointCloud();
 	ReleaseMesh();
 	obbPoints.Release();
-	if (window.IsValid()) {
-		window.ReleaseClbk();
-		window.Reset();
-		window.SetName(_T("(empty)"));
-	}
+	// if (window.IsValid()) {
+	// 	window.ReleaseClbk();
+	// 	window.Reset();
+	// 	window.SetName(_T("(empty)"));
+	// }
 	textures.Release();
 	images.Release();
 	scene.Release();
@@ -631,6 +631,24 @@ void Scene::Draw()
 	glfwSwapBuffers(window.GetWindow());
 }
 
+// void Scene::ProcessEvents()
+// {
+// 	glfwWaitEvents();
+// 	window.UpdateMousePosition();
+// 	if (glfwGetMouseButton(window.GetWindow(), GLFW_MOUSE_BUTTON_1) != GLFW_RELEASE)
+// 		window.camera.Rotate(window.pos, window.prevPos);
+// }
+//
+// void Scene::Loop()
+// {
+// 	std::this_thread::sleep_for(std::chrono::milliseconds(500));
+// 	while (!glfwWindowShouldClose(window.GetWindow())) {
+// 		ProcessEvents();
+// 		Draw();
+// 	}
+// 	Release();
+// }
+
 void Scene::Loop()
 {
 	while (!glfwWindowShouldClose(window.GetWindow())) {
@@ -639,7 +657,6 @@ void Scene::Loop()
 		glfwWaitEvents();
 	}
 }
-
 
 void Scene::Center()
 {
