@@ -89,9 +89,9 @@
   <widget class="QWidget" name="horizontalLayoutWidget_2">
    <property name="geometry">
     <rect>
-     <x>510</x>
+     <x>470</x>
      <y>-10</y>
-     <width>391</width>
+     <width>431</width>
      <height>61</height>
     </rect>
    </property>
@@ -99,7 +99,14 @@
     <item>
      <widget class="QPushButton" name="sfm_viewer">
       <property name="text">
-       <string>显示SfM</string>
+       <string>显示稀疏点云</string>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="densify_viewer">
+      <property name="text">
+       <string>显示稠密点云</string>
       </property>
      </widget>
     </item>

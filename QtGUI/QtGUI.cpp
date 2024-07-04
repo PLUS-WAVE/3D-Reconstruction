@@ -38,6 +38,12 @@ void QtGUI::initializeUI()
     connect(ui.sfm_button, &QPushButton::clicked, this, &QtGUI::executeSFM);
 	connect(ui.mvs_button, &QPushButton::clicked, this, &QtGUI::executeMVS);
     connect(ui.viewer_button, &QPushButton::clicked, this, &QtGUI::on_viewer_button_clicked);
+    connect(ui.sfm_viewer, &QPushButton::clicked, this, &QtGUI::on_sfm_viewer_button_clicked);
+    connect(ui.densify_viewer, &QPushButton::clicked, this, &QtGUI::on_densify_viewer_button_clicked);
+	connect(ui.mesh_viewer, &QPushButton::clicked, this, &QtGUI::on_mesh_viewer_button_clicked);
+	connect(ui.refinemesh_viewer, &QPushButton::clicked, this, &QtGUI::on_refinemesh_viewer_button_clicked);
+	connect(ui.texture_viewer, &QPushButton::clicked, this, &QtGUI::on_texture_viewer_button_clicked);
+
     this->set_menu = set_menu;
     m_textedit = ui.textEdit;
 
@@ -61,6 +67,70 @@ void QtGUI::on_viewer_button_clicked()
     MVSViewer->window.NewModel(fileName.toStdString());
 }
 
+void QtGUI::on_sfm_viewer_button_clicked()
+{
+	QString fileName = m_imageFolderPath + "/Output/MVS_Output/sfm_scene.mvs";
+    QFileInfo fileInfo(fileName);
+
+    if (!fileInfo.exists() || !fileInfo.isFile()) {
+        QMessageBox::warning(this, "错误", "SfM 结果文件不存在");
+        return;
+    }
+
+    auto_viewer(fileName);
+}
+
+void QtGUI::on_densify_viewer_button_clicked()
+{
+    QString fileName = m_imageFolderPath + "/Output/MVS_Output/Densify/scene_dense.mvs";
+    QFileInfo fileInfo(fileName);
+
+    if (!fileInfo.exists() || !fileInfo.isFile()) {
+        QMessageBox::warning(this, "错误", "MVS Densify 结果文件不存在");
+        return;
+    }
+
+    auto_viewer(fileName);
+}
+
+void QtGUI::on_mesh_viewer_button_clicked()
+{
+    QString fileName = m_imageFolderPath + "/Output/MVS_Output/Mesh/scene_dense_mesh.mvs";
+    QFileInfo fileInfo(fileName);
+
+    if (!fileInfo.exists() || !fileInfo.isFile()) {
+        QMessageBox::warning(this, "错误", "MVS Reconstruct Mesh 结果文件不存在");
+        return;
+    }
+
+    auto_viewer(fileName);
+}
+
+void QtGUI::on_refinemesh_viewer_button_clicked()
+{
+    QString fileName = m_imageFolderPath + "/Output/MVS_Output/RefineMesh/scene_dense_mesh_refine.mvs";
+    QFileInfo fileInfo(fileName);
+
+    if (!fileInfo.exists() || !fileInfo.isFile()) {
+        QMessageBox::warning(this, "错误", "MVS Refine Mesh 结果文件不存在");
+        return;
+    }
+
+    auto_viewer(fileName);
+}
+
+void QtGUI::on_texture_viewer_button_clicked()
+{
+    QString fileName = m_imageFolderPath + "/Output/MVS_Output/TextureMesh/scene_dense_mesh_refine_texture.mvs";
+    QFileInfo fileInfo(fileName);
+
+    if (!fileInfo.exists() || !fileInfo.isFile()) {
+        QMessageBox::warning(this, "错误", "MVS Texture Mesh 结果文件不存在");
+        return;
+    }
+
+    auto_viewer(fileName);
+}
 
 bool QtGUI::openViewer(QString fileName)
 {

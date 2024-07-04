@@ -54,6 +54,11 @@ private slots:
     void onSaveSelected(const QString& Save);
 
     void on_viewer_button_clicked();
+    void on_sfm_viewer_button_clicked();
+    void on_densify_viewer_button_clicked();
+    void on_mesh_viewer_button_clicked();
+    void on_refinemesh_viewer_button_clicked();
+    void on_texture_viewer_button_clicked();
 };
 
 class CameraDialog : public QDialog

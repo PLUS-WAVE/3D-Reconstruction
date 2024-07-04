@@ -36,10 +36,10 @@ bool MVSWorker::performMVSReconstruction(const QString& cameraIntrinsics, const 
 
     if (MAIN::start(imageFolderPath.toStdString(), cameraIntrinsics.toStdString(), algorithm.toStdString(), save.toStdString(), 1))
     {
-        logCallback("MVS Reconstruct Mesh 失败");
+        logCallback("MVS Densify 失败");
         return false;
     }
-    logCallback("MVS Reconstruct Mesh 成功");
+    logCallback("MVS Densify 成功");
 
     emit updateViewer(QString::fromStdString(imageFolderPath.toStdString() + "/Output/MVS_Output/Densify/scene_dense.mvs"));
 
