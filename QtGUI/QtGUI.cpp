@@ -22,8 +22,8 @@ QtGUI::QtGUI(QWidget *parent)
 
 QtGUI::~QtGUI()
 {
-    // CloseWindow(FindWindowA("GLFW30", "MVSViewer"));
-    // delete MVSViewer;
+    CloseWindow(FindWindowA("GLFW30", "MVSViewer"));
+    delete MVSViewer;
 }
 
 void QtGUI::initializeUI()
