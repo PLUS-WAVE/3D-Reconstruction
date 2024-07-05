@@ -343,7 +343,7 @@ int MAIN::start(std::string imagesInputDir, std::string kmatrix, std::string des
 			}
 		}
 
-		std::vector<std::string> extensions = { "mtl", "jpg", finalExportFormat };
+		std::vector<std::string> extensions = { "mtl", "jpg","png", finalExportFormat };
 		CopyRelevantFiles(textureMeshOutputDir, finalExportDir, extensions);
 
 		break;
