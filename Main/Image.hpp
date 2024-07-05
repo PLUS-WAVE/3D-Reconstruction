@@ -227,8 +227,6 @@ int LoadingImages(
 
 		if (openMVG::image::GetFormat(sImageFilename.c_str()) == openMVG::image::Unknown)
 		{
-			error_report_stream
-				<< sImFilenamePart << "ERROR 无法加载的图片格式 " << "\n";
 			continue;
 		}
 

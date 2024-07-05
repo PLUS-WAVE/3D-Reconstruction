@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>第五组-三维重建平台</string>
+   <string>第五组-三维重建平台（需要CUDA v12.5）</string>
   </property>
   <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
@@ -45,7 +45,7 @@
      </widget>
     </item>
     <item>
-     <widget class="QPushButton" name="viewer_button">
+     <widget class="QPushButton" name="Viewer_button">
       <property name="text">
        <string>自定义可视化</string>
       </property>

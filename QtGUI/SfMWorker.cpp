@@ -41,7 +41,7 @@ bool SfMWorker::performSfMReconstruction(const QString& cameraIntrinsics, const 
 
 	if (MAIN::start(imageFolderPath.toStdString(), cameraIntrinsics.toStdString(), algorithm.toStdString(), save.toStdString(), 0))
 	{
-        logCallback("SfM重建失败");
+        logCallback("SfM重建失败，请检查图片路径无中文！");
         return false;
 	}
     logCallback("SfM重建成功");

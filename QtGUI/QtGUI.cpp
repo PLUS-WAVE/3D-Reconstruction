@@ -37,7 +37,7 @@ void QtGUI::initializeUI()
     connect(set_button, &QPushButton::clicked, this, &QtGUI::show_set);
     connect(ui.sfm_button, &QPushButton::clicked, this, &QtGUI::executeSFM);
 	connect(ui.mvs_button, &QPushButton::clicked, this, &QtGUI::executeMVS);
-    connect(ui.viewer_button, &QPushButton::clicked, this, &QtGUI::on_viewer_button_clicked);
+    connect(ui.Viewer_button, &QPushButton::clicked, this, &QtGUI::on_viewer_button_clicked);
     connect(ui.sfm_viewer, &QPushButton::clicked, this, &QtGUI::on_sfm_viewer_button_clicked);
     connect(ui.densify_viewer, &QPushButton::clicked, this, &QtGUI::on_densify_viewer_button_clicked);
 	connect(ui.mesh_viewer, &QPushButton::clicked, this, &QtGUI::on_mesh_viewer_button_clicked);
@@ -51,11 +51,14 @@ void QtGUI::initializeUI()
 
 void QtGUI::on_viewer_button_clicked()
 {
+    QMessageBox::information(this, "注意", QString("路径不能有中文！"));
+
     QString fileName = QFileDialog::getOpenFileName(NULL, "Viewer", ".",
         "MVS Format(*.mvs);;Stanford Polygon File Format(*.ply);;Alias Wavefront Object(*.obj);;All Files(*.*)");
 
 	if (fileName == "") 
     {
+        std::cout << "1";
         return;
     }
 
@@ -176,6 +179,8 @@ void QtGUI::on1selected()
 
 void QtGUI::on2selected()
 {
+    QMessageBox::information(this, "注意", QString("图片文件夹路径不能有中文！"));
+
     // 打开文件夹选择对话框
     QString folderPath = QFileDialog::getExistingDirectory(this, "选择图片文件夹", QDir::homePath());
 
