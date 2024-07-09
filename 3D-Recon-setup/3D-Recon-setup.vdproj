@@ -429,6 +429,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_EFF657B467DF48D68149A5F5380FE577"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_F7A982A73507445790D8E91422E76626"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -1874,6 +1880,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_EFF657B467DF48D68149A5F5380FE577"
+            {
+            "SourcePath" = "8:D:\\dev\\NVIDIA GPU Computing Toolkit\\CUDA\\v12.5\\bin\\cudart64_12.dll"
+            "TargetName" = "8:cudart64_12.dll"
+            "Tag" = "8:"
+            "Folder" = "8:_4E027309592A4D14AF846EB6B1C4DD74"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_F7A982A73507445790D8E91422E76626"
             {
             "SourcePath" = "8:..\\x64\\Release\\libcolamd.dll"
@@ -1993,7 +2019,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:3D-Recon-setup"
         "ProductCode" = "8:{DBF08F5A-D69F-42A9-B7E5-55947C2608AC}"
-        "PackageCode" = "8:{FA13F797-A6AE-4645-88ED-4B8BA88C9E93}"
+        "PackageCode" = "8:{B4430BF8-C32B-4EC8-BA9D-443930725541}"
         "UpgradeCode" = "8:{2F4AB90C-98C7-48AB-A131-554633D19863}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
