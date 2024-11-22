@@ -26,8 +26,8 @@ bool MVSWorker::performMVSReconstruction(const QString& cameraIntrinsics, const 
 
     StreamBuffer customBuf;
     customBuf.outputCallback = [&logCallback](const std::string& text) {
-        static QStringDecoder decoder(QStringDecoder::Encoding::System);
-        QString decodedText = decoder(text);
+        static QTextDecoder decoder(QTextCodec::codecForName("System"));
+        QString decodedText = decoder.toUnicode(text.c_str());
         emit logCallback(decodedText);
         };
 

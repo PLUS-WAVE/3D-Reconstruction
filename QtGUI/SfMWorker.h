@@ -7,6 +7,8 @@
 #include <QString>
 #include <QObject>
 #include <QThread>
+#include <QTextCodec>
+#include <QTextDecoder>
 
 class SfMWorker : public QObject {
     Q_OBJECT

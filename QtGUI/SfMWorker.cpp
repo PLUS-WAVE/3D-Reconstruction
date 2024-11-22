@@ -1,4 +1,4 @@
-#include "SfMWorker.h"
+﻿#include "SfMWorker.h"
 
 #include "../Main/Main.hpp"
 
@@ -28,8 +28,8 @@ bool SfMWorker::performSfMReconstruction(const QString& cameraIntrinsics, const 
     StreamBuffer customBuf;
     customBuf.outputCallback = [&logCallback](const std::string& text) {
         // 使用QStringDecoder进行GB2312到UTF-16的转换
-        static QStringDecoder decoder(QStringDecoder::Encoding::System);
-        QString decodedText = decoder(text);
+        static QTextDecoder decoder(QTextCodec::codecForName("System"));
+        QString decodedText = decoder.toUnicode(text.c_str());
 
         // 现在decodedText是以UTF-16编码的QString，可以正确显示中文字符
         emit logCallback(decodedText);

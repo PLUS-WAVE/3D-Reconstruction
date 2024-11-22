@@ -1,4 +1,4 @@
-#include "QtGUI.h"
+﻿#include "QtGUI.h"
 #include <QVBoxLayout>
 #include <QFile>
 #include <QTextStream>
@@ -7,7 +7,8 @@
 #include <QFileInfo> 
 #include <QVariant>
 #include <QCoreApplication>
-#include <QStringConverter>
+#include <QDebug>
+// #include <QStringConverter>
 
 #include "SfMWorker.h"
 #include "MVSWorker.h"
@@ -23,7 +24,7 @@ QtGUI::QtGUI(QWidget *parent)
 QtGUI::~QtGUI()
 {
     CloseWindow(FindWindowA("GLFW30", "MVSViewer"));
-    delete MVSViewer;
+    // delete MVSViewer;
 }
 
 void QtGUI::initializeUI()
