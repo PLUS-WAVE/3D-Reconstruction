@@ -1,4 +1,5 @@
-﻿#include "QtGUI.h"
+﻿#pragma execution_character_set("utf-8")
+#include "QtGUI.h"
 #include <QVBoxLayout>
 #include <QFile>
 #include <QTextStream>

@@ -17,7 +17,7 @@ Viewer::Viewer(int i, QWidget* parent)
 	m_window->setFlags(m_window->flags() | Qt::CustomizeWindowHint | Qt::WindowTitleHint);
 	QWidget* m_widget;
 	m_widget = QWidget::createWindowContainer(m_window, this);
-	m_widget->setMinimumSize(890, 421);
+	m_widget->setMinimumSize(890, 331);
 }
 Viewer::~Viewer() {}
 
