@@ -32,6 +32,7 @@ private:
     Ui::QtWidgetsApplication1Class ui;
     QTextEdit* m_textedit;
     QMenu* set_menu;
+    QMenu* pi_menu;
     QString m_cameraIntrinsics;
 	QString m_imageFolderPath;
     QString m_algorithm = "AKAZE_FLOAT";
@@ -45,6 +46,13 @@ private:
     void executeMVS();
 
 private slots:
+    void on1selected_pi();
+    void on2selected_pi();
+    void show_set_pi();
+    void onStartShooting();
+    void onExecuteSfM_pi();
+    void onExecuteMVS_pi();
+
     void on1selected();
     void on2selected();
     void on3selected();

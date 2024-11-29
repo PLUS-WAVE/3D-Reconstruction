@@ -11,6 +11,7 @@
 #include <QDebug>
 // #include <QStringConverter>
 
+#include "ImageGetter.h"
 #include "SfMWorker.h"
 #include "MVSWorker.h"
 #include "Viewer.h"
@@ -30,6 +31,12 @@ QtGUI::~QtGUI()
 
 void QtGUI::initializeUI()
 {
+    QPushButton* pi_button = ui.pi_recon;
+    QMenu* pi_menu = new QMenu(this);
+    pi_menu->addAction("自动重建", this, &QtGUI::on1selected_pi);
+    pi_menu->addAction("手动重建", this, &QtGUI::on2selected_pi);
+    connect(pi_button, &QPushButton::clicked, this, &QtGUI::show_set_pi);
+
     QPushButton* set_button = ui.set_button;
     QMenu* set_menu = new QMenu(this);
     set_menu->addAction("选择相机内参", this, &QtGUI::on1selected);
@@ -46,7 +53,8 @@ void QtGUI::initializeUI()
 	connect(ui.refinemesh_viewer, &QPushButton::clicked, this, &QtGUI::on_refinemesh_viewer_button_clicked);
 	connect(ui.texture_viewer, &QPushButton::clicked, this, &QtGUI::on_texture_viewer_button_clicked);
 
-    this->set_menu = set_menu;
+    this->pi_menu = pi_menu;
+	this->set_menu = set_menu;
     m_textedit = ui.textEdit;
 
 }
@@ -166,6 +174,65 @@ void QtGUI::show_set()
 
     // 在按钮下方显示菜单
     set_menu->exec(pos);
+}
+
+void QtGUI::show_set_pi()
+{
+    QPoint pos = ui.pi_recon->mapToGlobal(QPoint(0, ui.pi_recon->height()));
+
+    // 在按钮下方显示菜单
+    pi_menu->exec(pos);
+}
+
+void QtGUI::on1selected_pi()
+{
+    
+}
+
+void QtGUI::on2selected_pi()
+{
+    QMenu *submenu = new QMenu(this);
+    submenu->addAction("开始拍摄", this, SLOT(onStartShooting()));
+    submenu->addAction("执行SfM", this, SLOT(onExecuteSfM()));
+    submenu->addAction("执行MVS", this, SLOT(onExecuteMVS()));
+
+    QPoint pos = ui.pi_recon->mapToGlobal(QPoint(0, ui.pi_recon->height()));
+    submenu->exec(pos);
+}
+
+void QtGUI::onStartShooting()
+{
+
+    QThread* thread = new QThread;
+    ImageWorker* worker = new ImageWorker();
+    // worker->setParameters(m_cameraIntrinsics, m_imageFolderPath, m_algorithm, m_save);
+    worker->moveToThread(thread);
+
+    connect(thread, &QThread::started, worker, &ImageWorker::process);
+    connect(worker, &ImageWorker::finished, thread, &QThread::quit);
+    connect(worker, &ImageWorker::finished, worker, &SfMWorker::deleteLater);
+    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+
+    connect(worker, &ImageWorker::finished, this, [this]() {
+        QMessageBox::information(this, "成功", "图像获取完成");
+        });
+    connect(worker, &ImageWorker::error, this, [this](const QString& errorMessage) {
+        QMessageBox::critical(this, "图像获取错误", errorMessage);
+        });
+
+    connect(worker, &ImageWorker::logMessage, this, &QtGUI::appendToTextEdit);
+
+    thread->start();
+}
+
+void QtGUI::onExecuteSfM_pi()
+{
+    // 执行SfM的逻辑
+}
+
+void QtGUI::onExecuteMVS_pi()
+{
+    // 执行MVS的逻辑
 }
 
 void QtGUI::on1selected()
