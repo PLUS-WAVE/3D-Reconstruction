@@ -3,6 +3,9 @@
 #include <iostream>
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
+#include <fcntl.h>
+#include <dirent.h>
+#include <sys/stat.h>
 #include <fstream>
 #include <Windows.h>
 
