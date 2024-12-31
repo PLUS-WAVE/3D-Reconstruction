@@ -37,6 +37,7 @@ private:
 	QString m_imageFolderPath;
     QString m_algorithm = "AKAZE_FLOAT";
     QString m_save = "ply";
+    QString m_PiImageFolderPath;
 
     VIEWER::Scene* MVSViewer = nullptr;
     bool ViewerAvailable = false;
@@ -50,6 +51,7 @@ private slots:
     void on2selected_pi();
     void show_set_pi();
     void onStartShooting();
+    void onPiFolderSelect();
     void onExecuteSfM_pi();
     void onExecuteMVS_pi();
 

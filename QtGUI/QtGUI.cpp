@@ -192,6 +192,7 @@ void QtGUI::on1selected_pi()
 void QtGUI::on2selected_pi()
 {
     QMenu *submenu = new QMenu(this);
+    submenu->addAction("选择工作文件夹", this, SLOT(onPiFolderSelect()));
     submenu->addAction("开始拍摄", this, SLOT(onStartShooting()));
     submenu->addAction("执行SfM", this, SLOT(onExecuteSfM()));
     submenu->addAction("执行MVS", this, SLOT(onExecuteMVS()));
@@ -200,12 +201,30 @@ void QtGUI::on2selected_pi()
     submenu->exec(pos);
 }
 
+void QtGUI::onPiFolderSelect()
+{
+	QMessageBox::information(this, "注意", QString("图片文件夹路径不能有中文！"));
+	// 打开文件夹选择对话框
+	QString folderPath = QFileDialog::getExistingDirectory(this, "选择图片文件夹", QDir::homePath());
+	if (folderPath.isEmpty()) {
+		qDebug() << "没有选择文件夹";
+		return;
+	}
+	QDir directory(folderPath);
+	m_PiImageFolderPath = folderPath;
+
+}
+
 void QtGUI::onStartShooting()
 {
+    if(m_PiImageFolderPath == NULL) {
+        QMessageBox::warning(this, "错误", "请先指定工作文件夹");
+        return;
+    }
 
     QThread* thread = new QThread;
     ImageWorker* worker = new ImageWorker();
-    // worker->setParameters(m_cameraIntrinsics, m_imageFolderPath, m_algorithm, m_save);
+    worker->setParameters(m_PiImageFolderPath);
     worker->moveToThread(thread);
 
     connect(thread, &QThread::started, worker, &ImageWorker::process);
@@ -227,12 +246,66 @@ void QtGUI::onStartShooting()
 
 void QtGUI::onExecuteSfM_pi()
 {
-    // 执行SfM的逻辑
+	m_cameraIntrinsics = "1082.29776;0;938.541475;0;1090.21410;610.944534;0;0;1";
+    QThread* thread = new QThread;
+    SfMWorker* worker = new SfMWorker();
+    worker->setParameters(m_cameraIntrinsics, m_PiImageFolderPath, m_algorithm, m_save); // 设置SfMWorker的参数
+    worker->moveToThread(thread);
+
+    connect(thread, &QThread::started, worker, &SfMWorker::process);
+    connect(worker, &SfMWorker::finished, thread, &QThread::quit);
+    connect(worker, &SfMWorker::finished, worker, &SfMWorker::deleteLater);
+    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+
+    connect(worker, &SfMWorker::finished, this, [this]() {
+        QMessageBox::information(this, "成功", "SFM 稀疏点云重建完成");
+        });
+    QString filename = m_imageFolderPath + "/Output/MVS_Output/sfm_scene.mvs";
+    connect(worker, &SfMWorker::finished, this, [this, filename]() {
+        this->auto_viewer(filename);
+        });
+    connect(worker, &SfMWorker::error, this, [this](const QString& errorMessage) {
+        QMessageBox::critical(this, "SFM 重建错误", errorMessage);
+        });
+
+    connect(worker, &SfMWorker::logMessage, this, &QtGUI::appendToTextEdit);
+
+    thread->start();
 }
 
 void QtGUI::onExecuteMVS_pi()
 {
-    // 执行MVS的逻辑
+    // 构建sfm_scene.mvs文件的完整路径
+    QString sfmScenePath = m_PiImageFolderPath + "/Output/MVS_Output/sfm_scene.mvs";
+    QFileInfo checkFile(sfmScenePath);
+
+    if (!checkFile.exists() || !checkFile.isFile()) {
+        QMessageBox::warning(this, "错误", "未找到SfM结果，请先执行SfM");
+        return;
+    }
+
+    QThread* thread = new QThread;
+    MVSWorker* worker = new MVSWorker();
+    worker->setParameters(m_cameraIntrinsics, m_PiImageFolderPath, m_algorithm, m_save, this);
+    worker->moveToThread(thread);
+
+    connect(thread, &QThread::started, worker, &MVSWorker::process);
+    connect(worker, &MVSWorker::finished, thread, &QThread::quit);
+    connect(worker, &MVSWorker::finished, worker, &MVSWorker::deleteLater);
+    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+
+    connect(worker, &MVSWorker::updateViewer, this, &QtGUI::auto_viewer);
+
+    connect(worker, &MVSWorker::finished, this, [this]() {
+        QMessageBox::information(this, "成功", "MVS重建完成：最终输出在" + m_PiImageFolderPath + "/Output/FinalExport");
+        });
+    connect(worker, &MVSWorker::error, this, [this](const QString& errorMessage) {
+        QMessageBox::critical(this, "MVS 重建错误", errorMessage);
+        });
+
+    connect(worker, &MVSWorker::logMessage, this, &QtGUI::appendToTextEdit);
+
+    thread->start();
 }
 
 void QtGUI::on1selected()
