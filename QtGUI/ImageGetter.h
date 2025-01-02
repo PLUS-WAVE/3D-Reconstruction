@@ -1,6 +1,7 @@
 #pragma once
 #include <functional>
 #include <iostream>
+#include <filesystem>
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 #include <fcntl.h>
@@ -22,16 +23,13 @@ class ImageWorker : public QObject {
 public:
     ImageWorker(QObject* parent = nullptr) : QObject(parent) {}
 
-    void setParameters(const QString& cameraIntrinsics, const QString& imageFolderPath, const QString& algorithm, const QString& saveFormat) {
-        this->cameraIntrinsics = cameraIntrinsics;
+    void setParameters(const QString& imageFolderPath) {
         this->imageFolderPath = imageFolderPath;
-        this->algorithm = algorithm;
-        this->saveFormat = saveFormat;
     }
 
 public slots:
     void process() {
-        bool success = performImageGet(cameraIntrinsics, imageFolderPath, algorithm, saveFormat,
+        bool success = performImageGet(imageFolderPath,
             [this](const QString& message) {
                 emit logMessage(message);
             });
@@ -50,15 +48,10 @@ signals:
     void error(const QString& errorMessage);
 
 private:
-    QString cameraIntrinsics;
     QString imageFolderPath;
-    QString algorithm;
-    QString saveFormat;
 
-    bool performImageGet(const QString& cameraIntrinsics,
+    bool performImageGet(
         const QString& imageFolderPath,
-        const QString& algorithm,
-        const QString& save,
         const std::function<void(const QString&)>& logCallback);
 };
 

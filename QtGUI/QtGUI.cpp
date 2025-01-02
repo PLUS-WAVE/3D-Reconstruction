@@ -194,8 +194,8 @@ void QtGUI::on2selected_pi()
     QMenu *submenu = new QMenu(this);
     submenu->addAction("选择工作文件夹", this, SLOT(onPiFolderSelect()));
     submenu->addAction("开始拍摄", this, SLOT(onStartShooting()));
-    submenu->addAction("执行SfM", this, SLOT(onExecuteSfM()));
-    submenu->addAction("执行MVS", this, SLOT(onExecuteMVS()));
+    submenu->addAction("执行SfM", this, SLOT(onExecuteSfM_Pi()));
+    submenu->addAction("执行MVS", this, SLOT(onExecuteMVS_Pi()));
 
     QPoint pos = ui.pi_recon->mapToGlobal(QPoint(0, ui.pi_recon->height()));
     submenu->exec(pos);

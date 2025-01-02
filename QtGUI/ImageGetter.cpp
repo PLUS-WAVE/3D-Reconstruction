@@ -18,40 +18,6 @@ protected:
     }
 };
 
-bool executeRemoteCommand(ssh_session session, const std::string& command) {
-    ssh_channel channel = ssh_channel_new(session);
-    if (channel == nullptr) {
-        std::cerr << "Error: Unable to create SSH channel." << std::endl;
-        return false;
-    }
-
-    if (ssh_channel_open_session(channel) != SSH_OK) {
-        std::cerr << "Error: Unable to open SSH channel session." << std::endl;
-        ssh_channel_free(channel);
-        return false;
-    }
-
-    if (ssh_channel_request_exec(channel, command.c_str()) != SSH_OK) {
-        std::cerr << "Error: Unable to execute remote command." << std::endl;
-        ssh_channel_close(channel);
-        ssh_channel_free(channel);
-        return false;
-    }
-    char buffer[256];
-    int nbytes;
-    while ((nbytes = ssh_channel_read(channel, buffer, sizeof(buffer), 0)) > 0) {
-        std::cout.write(buffer, nbytes);
-    }
-    if (nbytes < 0) {
-        std::cerr << "Error: Failed to read data from SSH channel." << std::endl;
-    }
-
-    ssh_channel_send_eof(channel);
-    ssh_channel_close(channel);
-    ssh_channel_free(channel);
-    return true;
-}
-
 bool downloadFile(ssh_session session, const std::string& remotePath, const std::string& localPath) {
     sftp_session sftp = sftp_new(session);
     if (sftp == nullptr) {
@@ -77,7 +43,7 @@ bool downloadFile(ssh_session session, const std::string& remotePath, const std:
     std::ofstream outputFile(localPath, std::ios::binary);
     if (!outputFile) {
         std::cerr << "Error: Unable to open local file: " << localPath << std::endl;
-        sftp_close(file);
+                sftp_close(file);
         sftp_free(sftp);
         return false;
     }
@@ -86,12 +52,12 @@ bool downloadFile(ssh_session session, const std::string& remotePath, const std:
     char buffer[1024];
     int bytesRead;
     while ((bytesRead = sftp_read(file, buffer, sizeof(buffer))) > 0) {
-        outputFile.write(buffer, bytesRead);
+                outputFile.write(buffer, bytesRead);
     }
 
     if (bytesRead < 0) {
         std::cerr << "Error: Reading from remote file failed. " << ssh_get_error(session) << std::endl;
-        sftp_close(file);
+            sftp_close(file);
         sftp_free(sftp);
         return false;
     }
@@ -101,7 +67,45 @@ bool downloadFile(ssh_session session, const std::string& remotePath, const std:
     return true;
 }
 
-bool ImageWorker::performImageGet(const QString& cameraIntrinsics, const QString& imageFolderPath, const QString& algorithm, const QString& save, const std::function<void(const QString&)>& logCallback)
+bool downloadDirectory(ssh_session session, const std::string& remoteDir, const std::string& localDir) {
+    sftp_session sftp = sftp_new(session);
+    if (!sftp || sftp_init(sftp) != SSH_OK) {
+        std::cerr << "Error: SFTP init." << std::endl;
+        return false;
+    }
+
+    sftp_dir dir = sftp_opendir(sftp, remoteDir.c_str());
+    if (!dir) {
+        std::cerr << "Error: sftp_opendir." << std::endl;
+        sftp_free(sftp);
+        return false;
+    }
+
+    std::vector<std::string> files;
+    while (true) {
+        sftp_attributes attr = sftp_readdir(sftp, dir);
+        if (!attr) break;
+        if (!(attr->type & SSH_FILEXFER_TYPE_DIRECTORY)) {
+            files.push_back(attr->name);
+        }
+        sftp_attributes_free(attr);
+    }
+
+    std::sort(files.begin(), files.end());
+
+    for (const auto& file : files) {
+        std::string remoteFilePath = remoteDir + "/" + file;
+        std::string localFilePath = localDir + "\\" + file;
+        downloadFile(session, remoteFilePath, localFilePath);
+        std::cout << "Downloaded: " << remoteFilePath << std::endl;
+    }
+
+    sftp_closedir(dir);
+    sftp_free(sftp);
+    return true;
+}
+
+bool ImageWorker::performImageGet(const QString& imageFolderPath, const std::function<void(const QString&)>& logCallback)
 {
     auto coutBuf = std::cout.rdbuf();
     auto cerrBuf = std::cerr.rdbuf();
@@ -111,7 +115,7 @@ bool ImageWorker::performImageGet(const QString& cameraIntrinsics, const QString
         static QTextDecoder decoder(QTextCodec::codecForName("System"));
         QString decodedText = decoder.toUnicode(text.c_str());
         emit logCallback(decodedText);
-        };
+    };
 
     std::cout.rdbuf(&customBuf);
     std::cerr.rdbuf(&customBuf);
@@ -122,7 +126,7 @@ bool ImageWorker::performImageGet(const QString& cameraIntrinsics, const QString
         return false;
     }
 
-    ssh_options_set(session, SSH_OPTIONS_HOST, "113.54.240.120");
+    ssh_options_set(session, SSH_OPTIONS_HOST, "113.54.253.71");
     ssh_options_set(session, SSH_OPTIONS_USER, "user");
 
     if (ssh_connect(session) != SSH_OK) {
@@ -140,15 +144,58 @@ bool ImageWorker::performImageGet(const QString& cameraIntrinsics, const QString
     }
     std::cout << "Authenticated" << std::endl;
 
-    if (!executeRemoteCommand(session, "/usr/bin/fswebcam -r 1920x1080 --no-banner /home/user/dev/recon_img/001.png")) {
-        std::cerr << "Error: Failed to execute remote command." << std::endl;
+    ssh_channel channel = ssh_channel_new(session);
+    if (!channel) {
+        std::cerr << "Error: Unable to create SSH channel." << std::endl;
+        ssh_disconnect(session);
+        ssh_free(session);
+        return false;
+    }
+    if (ssh_channel_open_session(channel) != SSH_OK) {
+        std::cerr << "Error: Unable to open SSH channel session." << std::endl;
+        ssh_channel_free(channel);
+        ssh_disconnect(session);
+        ssh_free(session);
+        return false;
+    }
+    if (ssh_channel_request_exec(channel, "bash -i /home/user/run.sh") != SSH_OK) {
+        std::cerr << "Error: Unable to execute remote script." << std::endl;
+        ssh_channel_close(channel);
+        ssh_channel_free(channel);
         ssh_disconnect(session);
         ssh_free(session);
         return false;
     }
 
-    if (!downloadFile(session, "/home/user/dev/recon_img/001.png", "C:\\Users\\WJW\\Downloads\\001.png")) {
-        std::cerr << "Error: Failed to download file." << std::endl;
+    {
+        char buffer[256];
+        while (true) {
+            if (!ssh_channel_is_open(channel) || ssh_channel_is_eof(channel)) {
+                std::cout << "Channel closed or EOF reached." << std::endl;
+                break;
+            }
+
+            int nbytes = ssh_channel_read(channel, buffer, sizeof(buffer), 0);
+            if (nbytes > 0) {
+                std::cout.write(buffer, nbytes);
+                std::cout.flush();
+            }
+            else if (nbytes == SSH_ERROR) {
+                std::cerr << "Error reading from SSH channel." << std::endl;
+                break;
+            }
+            else if (nbytes == 0) {
+                // No more data available
+                break;
+            }
+        }
+
+    }
+    ssh_channel_close(channel);
+    ssh_channel_free(channel);
+    std::string folder = imageFolderPath.toStdString();
+    if (!downloadDirectory(session, "/home/user/dev/raw_img", folder)) {
+        std::cerr << "Error: Failed to download directory." << std::endl;
         ssh_disconnect(session);
         ssh_free(session);
         return false;
