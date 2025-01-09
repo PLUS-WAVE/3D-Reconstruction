@@ -33,8 +33,13 @@ void QtGUI::initializeUI()
 {
     QPushButton* pi_button = ui.pi_recon;
     QMenu* pi_menu = new QMenu(this);
-    pi_menu->addAction("自动重建", this, &QtGUI::on1selected_pi);
-    pi_menu->addAction("手动重建", this, &QtGUI::on2selected_pi);
+
+    pi_menu->addAction("SSH连接设定", this, SLOT(onPiSSHSelect()));
+    pi_menu->addAction("选择工作文件夹", this, SLOT(onPiFolderSelect()));
+    pi_menu->addAction("开始拍摄", this, SLOT(onStartShooting()));
+    pi_menu->addAction("执行SfM", this, SLOT(onExecuteSfM_pi()));
+    pi_menu->addAction("执行MVS", this, SLOT(onExecuteMVS_pi()));
+
     connect(pi_button, &QPushButton::clicked, this, &QtGUI::show_set_pi);
 
     QPushButton* set_button = ui.set_button;
@@ -184,23 +189,6 @@ void QtGUI::show_set_pi()
     pi_menu->exec(pos);
 }
 
-void QtGUI::on1selected_pi()
-{
-    
-}
-
-void QtGUI::on2selected_pi()
-{
-    QMenu *submenu = new QMenu(this);
-    submenu->addAction("选择工作文件夹", this, SLOT(onPiFolderSelect()));
-    submenu->addAction("开始拍摄", this, SLOT(onStartShooting()));
-    submenu->addAction("执行SfM", this, SLOT(onExecuteSfM_Pi()));
-    submenu->addAction("执行MVS", this, SLOT(onExecuteMVS_Pi()));
-
-    QPoint pos = ui.pi_recon->mapToGlobal(QPoint(0, ui.pi_recon->height()));
-    submenu->exec(pos);
-}
-
 void QtGUI::onPiFolderSelect()
 {
 	QMessageBox::information(this, "注意", QString("图片文件夹路径不能有中文！"));
@@ -224,7 +212,7 @@ void QtGUI::onStartShooting()
 
     QThread* thread = new QThread;
     ImageWorker* worker = new ImageWorker();
-    worker->setParameters(m_PiImageFolderPath);
+    worker->setParameters(m_PiImageFolderPath, m_ssh_host, m_ssh_user, m_ssh_password);
     worker->moveToThread(thread);
 
     connect(thread, &QThread::started, worker, &ImageWorker::process);
@@ -317,6 +305,19 @@ void QtGUI::on1selected()
     connect(dialog, &CameraDialog::cameraIntrinsicsSelected, this, [this](const QString& Intrinsics) {
         m_cameraIntrinsics = Intrinsics; // 将相机型号保存到成员变量
         });
+}
+
+void QtGUI::onPiSSHSelect()
+{
+	SSHDialog* dialog = new SSHDialog(this);
+	dialog->setAttribute(Qt::WA_DeleteOnClose);
+	dialog->show();
+	connect(dialog, &SSHDialog::sshCredentialsEntered, this, [this](const QString& host, const QString& user, const QString& password) {
+		m_ssh_host = host;
+        m_ssh_user = user;
+        m_ssh_password = password;
+	});
+
 }
 
 void QtGUI::on2selected()
@@ -419,6 +420,45 @@ void CameraDialog::onConfirmClicked()
     }
 }
 
+SSHDialog::SSHDialog(QWidget* parent) : QDialog(parent)
+{
+    setWindowTitle("请输入SSH信息");
+    QVBoxLayout* layout = new QVBoxLayout(this);
+
+    hostLineEdit = new QLineEdit(this);
+    userLineEdit = new QLineEdit(this);
+    passwordLineEdit = new QLineEdit(this);
+    passwordLineEdit->setEchoMode(QLineEdit::Password);
+    confirmButton = new QPushButton("确认", this);
+
+    layout->addWidget(new QLabel("Host(default 113.54.253.71):", this));
+    layout->addWidget(hostLineEdit);
+    layout->addWidget(new QLabel("User(default user):", this));
+    layout->addWidget(userLineEdit);
+    layout->addWidget(new QLabel("Password(default 1234):", this));
+    layout->addWidget(passwordLineEdit);
+    layout->addWidget(confirmButton);
+
+    setLayout(layout);
+    resize(420, 150);
+
+    connect(confirmButton, &QPushButton::clicked, this, &SSHDialog::onConfirmClicked);
+}
+
+void SSHDialog::onConfirmClicked()
+{
+    QString host = hostLineEdit->text();
+    QString user = userLineEdit->text();
+    QString password = passwordLineEdit->text();
+
+    if (!host.isEmpty() && !user.isEmpty() && !password.isEmpty()) {
+        emit sshCredentialsEntered(host, user, password);
+        accept();
+    }
+    else {
+        QMessageBox::critical(this, "输入错误", "所有字段均为必填项，请重新输入。");
+    }
+}
 
 void QtGUI::executeSFM()
 {

@@ -23,13 +23,16 @@ class ImageWorker : public QObject {
 public:
     ImageWorker(QObject* parent = nullptr) : QObject(parent) {}
 
-    void setParameters(const QString& imageFolderPath) {
+    void setParameters(const QString& imageFolderPath, const QString& ssh_host, const QString& ssh_user, const QString& ssh_password) {
         this->imageFolderPath = imageFolderPath;
+		this->ssh_host = ssh_host;
+		this->ssh_user = ssh_user;
+		this->ssh_password = ssh_password;
     }
 
 public slots:
     void process() {
-        bool success = performImageGet(imageFolderPath,
+		bool success = performImageGet(imageFolderPath, ssh_host, ssh_user, ssh_password,
             [this](const QString& message) {
                 emit logMessage(message);
             });
@@ -49,9 +52,15 @@ signals:
 
 private:
     QString imageFolderPath;
+    QString ssh_host;
+    QString ssh_user;
+	QString ssh_password;
 
     bool performImageGet(
         const QString& imageFolderPath,
+        const QString& ssh_host,
+		const QString& ssh_user,
+		const QString& ssh_password,
         const std::function<void(const QString&)>& logCallback);
 };
 

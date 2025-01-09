@@ -38,6 +38,9 @@ private:
     QString m_algorithm = "AKAZE_FLOAT";
     QString m_save = "ply";
     QString m_PiImageFolderPath;
+    QString m_ssh_host = "113.54.253.71";
+    QString m_ssh_user = "user";
+    QString m_ssh_password = "1234";
 
     VIEWER::Scene* MVSViewer = nullptr;
     bool ViewerAvailable = false;
@@ -47,10 +50,9 @@ private:
     void executeMVS();
 
 private slots:
-    void on1selected_pi();
-    void on2selected_pi();
     void show_set_pi();
     void onStartShooting();
+    void onPiSSHSelect();
     void onPiFolderSelect();
     void onExecuteSfM_pi();
     void onExecuteMVS_pi();
@@ -87,6 +89,26 @@ private slots:
 
 private:
     QLineEdit* IntrinsicsLineEdit;
+    QPushButton* confirmButton;
+};
+
+class SSHDialog : public QDialog
+{
+    Q_OBJECT
+
+public:
+    explicit SSHDialog(QWidget* parent = nullptr);
+
+signals:
+    void sshCredentialsEntered(const QString& host, const QString& user, const QString& password);
+
+private slots:
+    void onConfirmClicked();
+
+private:
+    QLineEdit* hostLineEdit;
+    QLineEdit* userLineEdit;
+    QLineEdit* passwordLineEdit;
     QPushButton* confirmButton;
 };
 

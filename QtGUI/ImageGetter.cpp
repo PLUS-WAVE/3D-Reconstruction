@@ -105,7 +105,7 @@ bool downloadDirectory(ssh_session session, const std::string& remoteDir, const 
     return true;
 }
 
-bool ImageWorker::performImageGet(const QString& imageFolderPath, const std::function<void(const QString&)>& logCallback)
+bool ImageWorker::performImageGet(const QString& imageFolderPath, const QString& ssh_host, const QString& ssh_user, const QString& ssh_password, const std::function<void(const QString&)>& logCallback)
 {
     auto coutBuf = std::cout.rdbuf();
     auto cerrBuf = std::cerr.rdbuf();
@@ -126,8 +126,8 @@ bool ImageWorker::performImageGet(const QString& imageFolderPath, const std::fun
         return false;
     }
 
-    ssh_options_set(session, SSH_OPTIONS_HOST, "113.54.253.71");
-    ssh_options_set(session, SSH_OPTIONS_USER, "user");
+    ssh_options_set(session, SSH_OPTIONS_HOST, ssh_host.toStdString().c_str());
+    ssh_options_set(session, SSH_OPTIONS_USER, ssh_user.toStdString().c_str());
 
     if (ssh_connect(session) != SSH_OK) {
         std::cerr << "Error: Unable to connect to SSH server." << std::endl;
@@ -136,7 +136,7 @@ bool ImageWorker::performImageGet(const QString& imageFolderPath, const std::fun
     }
     std::cout << "Connected to remote server" << std::endl;
 
-    if (ssh_userauth_password(session, nullptr, "1234") != SSH_AUTH_SUCCESS) {
+    if (ssh_userauth_password(session, nullptr, ssh_password.toStdString().c_str()) != SSH_AUTH_SUCCESS) {
         std::cerr << "Error: Authentication failed." << std::endl;
         ssh_disconnect(session);
         ssh_free(session);
