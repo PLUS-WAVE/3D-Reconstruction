@@ -41,10 +41,10 @@ bool SfMWorker::performSfMReconstruction(const QString& cameraIntrinsics, const 
 
 	if (MAIN::start(imageFolderPath.toStdString(), cameraIntrinsics.toStdString(), algorithm.toStdString(), save.toStdString(), 0))
 	{
-        logCallback("SfM重建失败，请检查图片路径无中文！");
+        logCallback("SfM failed! Please check that the path does not contain Chinese characters.");
         return false;
 	}
-    logCallback("SfM重建成功");
+    logCallback("SfM success!");
 
 
     // 恢复原始buf

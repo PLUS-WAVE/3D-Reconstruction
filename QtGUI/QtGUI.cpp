@@ -200,7 +200,7 @@ void QtGUI::onPiFolderSelect()
 	}
 	QDir directory(folderPath);
 	m_PiImageFolderPath = folderPath;
-
+    m_imageFolderPath = m_PiImageFolderPath;
 }
 
 void QtGUI::onStartShooting()
@@ -234,10 +234,14 @@ void QtGUI::onStartShooting()
 
 void QtGUI::onExecuteSfM_pi()
 {
-	m_cameraIntrinsics = "1082.29776;0;938.541475;0;1090.21410;610.944534;0;0;1";
+    if (m_PiImageFolderPath.isEmpty()) {
+        QMessageBox::warning(this, "错误", "请先至少选择工作文件夹");
+        return;
+    }
+	QString cameraIntrinsics = "1082.29776;0;938.541475;0;1090.21410;610.944534;0;0;1";
     QThread* thread = new QThread;
     SfMWorker* worker = new SfMWorker();
-    worker->setParameters(m_cameraIntrinsics, m_PiImageFolderPath, m_algorithm, m_save); // 设置SfMWorker的参数
+    worker->setParameters(cameraIntrinsics, m_PiImageFolderPath, m_algorithm, m_save); // 设置SfMWorker的参数
     worker->moveToThread(thread);
 
     connect(thread, &QThread::started, worker, &SfMWorker::process);
@@ -253,7 +257,7 @@ void QtGUI::onExecuteSfM_pi()
         this->auto_viewer(filename);
         });
     connect(worker, &SfMWorker::error, this, [this](const QString& errorMessage) {
-        QMessageBox::critical(this, "SFM 重建错误", errorMessage);
+        QMessageBox::critical(this, "SFM 重建错误", QString::fromUtf8(errorMessage.toLocal8Bit()));
         });
 
     connect(worker, &SfMWorker::logMessage, this, &QtGUI::appendToTextEdit);
@@ -272,9 +276,11 @@ void QtGUI::onExecuteMVS_pi()
         return;
     }
 
+    QString cameraIntrinsics = "1082.29776;0;938.541475;0;1090.21410;610.944534;0;0;1";
+
     QThread* thread = new QThread;
     MVSWorker* worker = new MVSWorker();
-    worker->setParameters(m_cameraIntrinsics, m_PiImageFolderPath, m_algorithm, m_save, this);
+    worker->setParameters(cameraIntrinsics, m_PiImageFolderPath, m_algorithm, m_save, this);
     worker->moveToThread(thread);
 
     connect(thread, &QThread::started, worker, &MVSWorker::process);
@@ -322,6 +328,9 @@ void QtGUI::onPiSSHSelect()
 
 void QtGUI::on2selected()
 {
+    // 设置 m_PiImageFolderPath 为空
+	m_PiImageFolderPath = "";
+    
     QMessageBox::information(this, "注意", QString("图片文件夹路径不能有中文！"));
 
     // 打开文件夹选择对话框
@@ -506,6 +515,11 @@ void QtGUI::auto_viewer(const QString& filename)
 
 void QtGUI::executeMVS()
 {
+    if (m_cameraIntrinsics.isEmpty() || m_imageFolderPath.isEmpty()) {
+        QMessageBox::warning(this, "错误", "请先至少选择相机内参、图片文件夹");
+        return;
+    }
+
     // 构建sfm_scene.mvs文件的完整路径
     QString sfmScenePath = m_imageFolderPath + "/Output/MVS_Output/sfm_scene.mvs";
     QFileInfo checkFile(sfmScenePath);

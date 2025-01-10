@@ -41,7 +41,7 @@ public slots:
             emit finished();
         }
         else {
-            emit error("图像获取重建失败");
+            emit error("图像获取失败");
         }
     }
 
