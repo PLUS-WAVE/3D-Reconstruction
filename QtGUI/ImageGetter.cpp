@@ -194,7 +194,7 @@ bool ImageWorker::performImageGet(const QString& imageFolderPath, const QString&
     ssh_channel_close(channel);
     ssh_channel_free(channel);
     std::string folder = imageFolderPath.toStdString();
-    if (!downloadDirectory(session, "/home/user/dev/raw_img", folder)) {
+    if (!downloadDirectory(session, "/home/user/dev/processed_img", folder)) {
         std::cerr << "Error: Failed to download directory." << std::endl;
         ssh_disconnect(session);
         ssh_free(session);

@@ -440,7 +440,7 @@ SSHDialog::SSHDialog(QWidget* parent) : QDialog(parent)
     passwordLineEdit->setEchoMode(QLineEdit::Password);
     confirmButton = new QPushButton("确认", this);
 
-    layout->addWidget(new QLabel("Host(default 113.54.253.71):", this));
+    layout->addWidget(new QLabel("Host(default 192.168.216.49):", this));
     layout->addWidget(hostLineEdit);
     layout->addWidget(new QLabel("User(default user):", this));
     layout->addWidget(userLineEdit);

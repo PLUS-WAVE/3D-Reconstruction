@@ -38,7 +38,7 @@ private:
     QString m_algorithm = "AKAZE_FLOAT";
     QString m_save = "ply";
     QString m_PiImageFolderPath;
-    QString m_ssh_host = "113.54.253.71";
+    QString m_ssh_host = "192.168.216.49";
     QString m_ssh_user = "user";
     QString m_ssh_password = "1234";
 
