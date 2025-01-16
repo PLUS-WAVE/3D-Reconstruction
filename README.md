@@ -116,7 +116,7 @@ https://github.com/user-attachments/assets/5714ac91-e7e6-47ac-973b-e31a2a9831a5
 >
 > `vcpkg export` 生成独立、可分发的 SDK（软件开发工具包），可在另一台计算机上使用而无需单独获取 vcpkg
 
-解压后直接在解压的目录中运行命令：`./vcpkg.exe integrate install` 即可集成到 VS 中
+下载 Release 中的 [vcpkg-export-20250116-214440.7z](https://github.com/PLUS-WAVE/WAVE-3D-Reconstruction/releases/download/v1.0.0/vcpkg-export-20250116-214440.7z)，解压后直接在解压的目录中运行命令：`./vcpkg.exe integrate install` 即可集成到 VS 中
 
 ## 6 Usage
 
