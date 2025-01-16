@@ -63,7 +63,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_1A96743D228E4A73A3BAE9BB9A1DB847"
+        "MsmKey" = "8:_20AAEFD64DEE4CC6B65E00854695C27D"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -267,12 +267,6 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_76984448A65E41E48BD41580427400CE"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_7B11634561BC4C348D0FDD62FAC87717"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -394,6 +388,12 @@
         "Entry"
         {
         "MsmKey" = "8:_A47A0396372D4C8DA6461A1648C593A1"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_A6C5DD74EA3B4A5094261A59B457C6C9"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -800,12 +800,12 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1A96743D228E4A73A3BAE9BB9A1DB847"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_20AAEFD64DEE4CC6B65E00854695C27D"
             {
-            "SourcePath" = "8:D:\\Users\\WJW\\Desktop\\文件\\A.资源\\logo\\w.ico"
-            "TargetName" = "8:w.ico"
+            "SourcePath" = "8:..\\QtGUI\\assets\\WAVE-3D-LOGO.ico"
+            "TargetName" = "8:WAVE-3D-LOGO.ico"
             "Tag" = "8:"
-            "Folder" = "8:_F528C4D58FB44A5182B81BE563409F65"
+            "Folder" = "8:_34281630B71C4B2A929759E2E5462B1F"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -1480,26 +1480,6 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_76984448A65E41E48BD41580427400CE"
-            {
-            "SourcePath" = "8:..\\QtGUI\\assets\\wave+.png"
-            "TargetName" = "8:wave+.png"
-            "Tag" = "8:"
-            "Folder" = "8:_34281630B71C4B2A929759E2E5462B1F"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_7B11634561BC4C348D0FDD62FAC87717"
             {
             "SourcePath" = "8:..\\x64\\Release\\Clp-0.dll"
@@ -1906,6 +1886,26 @@
             "TargetName" = "8:libcholmod.dll"
             "Tag" = "8:"
             "Folder" = "8:_4E027309592A4D14AF846EB6B1C4DD74"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_A6C5DD74EA3B4A5094261A59B457C6C9"
+            {
+            "SourcePath" = "8:..\\QtGUI\\assets\\WAVE-3D-LOGO.png"
+            "TargetName" = "8:WAVE-3D-LOGO.png"
+            "Tag" = "8:"
+            "Folder" = "8:_34281630B71C4B2A929759E2E5462B1F"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -2522,17 +2522,6 @@
                         {
                         }
                     }
-                    "{9EF0B969-E518-4E46-987F-47570745A589}:_F528C4D58FB44A5182B81BE563409F65"
-                    {
-                    "Name" = "8:Image"
-                    "AlwaysCreate" = "11:FALSE"
-                    "Condition" = "8:"
-                    "Transitive" = "11:FALSE"
-                    "Property" = "8:_699669C7606B426CA91EAA83EA55C37F"
-                        "Folders"
-                        {
-                        }
-                    }
                 }
             }
             "{1525181F-901A-416C-8A58-119130FE478E}:_5713D96801F440399B7DD32996CD598E"
@@ -2574,7 +2563,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:WAVE-3D-Recon"
         "ProductCode" = "8:{DBF08F5A-D69F-42A9-B7E5-55947C2608AC}"
-        "PackageCode" = "8:{C7099601-94A1-4D97-B354-375CF5446B41}"
+        "PackageCode" = "8:{24DA2A52-6588-42C1-BE0E-40BFB0AEB612}"
         "UpgradeCode" = "8:{2F4AB90C-98C7-48AB-A131-554633D19863}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
@@ -2705,7 +2694,7 @@
             "Target" = "8:_3C17330470DA4ACBAC5BD13FC2329473"
             "Folder" = "8:_ABF7AA5F39A8480EB84359299909EBE8"
             "WorkingFolder" = "8:_4E027309592A4D14AF846EB6B1C4DD74"
-            "Icon" = "8:_1A96743D228E4A73A3BAE9BB9A1DB847"
+            "Icon" = "8:_20AAEFD64DEE4CC6B65E00854695C27D"
             "Feature" = "8:"
             }
         }

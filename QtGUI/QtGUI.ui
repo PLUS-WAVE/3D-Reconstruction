@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset>
-    <normaloff>assets/wave+.png</normaloff>assets/wave+.png</iconset>
+    <normaloff>assets/WAVE-3D-LOGO.png</normaloff>assets/WAVE-3D-LOGO.png</iconset>
   </property>
   <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
