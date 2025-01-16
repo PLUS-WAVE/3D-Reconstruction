@@ -31,16 +31,16 @@ QtGUI::~QtGUI()
 
 void QtGUI::initializeUI()
 {
-    QPushButton* pi_button = ui.pi_recon;
-    QMenu* pi_menu = new QMenu(this);
+    // QPushButton* pi_button = ui.pi_recon;
+    // QMenu* pi_menu = new QMenu(this);
+    //
+    // pi_menu->addAction("SSH连接设定", this, SLOT(onPiSSHSelect()));
+    // pi_menu->addAction("选择工作文件夹", this, SLOT(onPiFolderSelect()));
+    // pi_menu->addAction("开始拍摄", this, SLOT(onStartShooting()));
+    // pi_menu->addAction("执行SfM", this, SLOT(onExecuteSfM_pi()));
+    // pi_menu->addAction("执行MVS", this, SLOT(onExecuteMVS_pi()));
 
-    pi_menu->addAction("SSH连接设定", this, SLOT(onPiSSHSelect()));
-    pi_menu->addAction("选择工作文件夹", this, SLOT(onPiFolderSelect()));
-    pi_menu->addAction("开始拍摄", this, SLOT(onStartShooting()));
-    pi_menu->addAction("执行SfM", this, SLOT(onExecuteSfM_pi()));
-    pi_menu->addAction("执行MVS", this, SLOT(onExecuteMVS_pi()));
-
-    connect(pi_button, &QPushButton::clicked, this, &QtGUI::show_set_pi);
+    // connect(pi_button, &QPushButton::clicked, this, &QtGUI::show_set_pi);
 
     QPushButton* set_button = ui.set_button;
     QMenu* set_menu = new QMenu(this);
@@ -181,13 +181,13 @@ void QtGUI::show_set()
     set_menu->exec(pos);
 }
 
-void QtGUI::show_set_pi()
-{
-    QPoint pos = ui.pi_recon->mapToGlobal(QPoint(0, ui.pi_recon->height()));
-
-    // 在按钮下方显示菜单
-    pi_menu->exec(pos);
-}
+// void QtGUI::show_set_pi()
+// {
+//     QPoint pos = ui.pi_recon->mapToGlobal(QPoint(0, ui.pi_recon->height()));
+//
+//     // 在按钮下方显示菜单
+//     pi_menu->exec(pos);
+// }
 
 void QtGUI::onPiFolderSelect()
 {

@@ -3,7 +3,7 @@
 "VSVersion" = "3:800"
 "ProjectType" = "8:{978C614F-708E-4E1A-B201-565925725DBA}"
 "IsWebType" = "8:FALSE"
-"ProjectName" = "8:3D-Recon-setup"
+"ProjectName" = "8:WAVE-3D-Recon"
 "LanguageId" = "3:2052"
 "CodePage" = "3:936"
 "UILanguageId" = "3:2052"
@@ -262,6 +262,12 @@
         "Entry"
         {
         "MsmKey" = "8:_7130885A0C714EB7B3749B97D751DCEB"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_76984448A65E41E48BD41580427400CE"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -555,7 +561,7 @@
         "DisplayName" = "8:Debug"
         "IsDebugOnly" = "11:TRUE"
         "IsReleaseOnly" = "11:FALSE"
-        "OutputFilename" = "8:Debug\\3D-Recon-setup.msi"
+        "OutputFilename" = "8:Debug\\WAVE-3D-Recon.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -572,6 +578,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.7.2"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.7.2 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.7.2"
+                    }
+                }
             }
         }
         "Release"
@@ -579,7 +593,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:Release\\3D-Recon-setup.msi"
+        "OutputFilename" = "8:Release\\WAVE-3D-Recon.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -1452,6 +1466,26 @@
             "TargetName" = "8:boost_serialization-vc143-mt-x64-1_83.dll"
             "Tag" = "8:"
             "Folder" = "8:_4E027309592A4D14AF846EB6B1C4DD74"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_76984448A65E41E48BD41580427400CE"
+            {
+            "SourcePath" = "8:..\\QtGUI\\assets\\wave+.png"
+            "TargetName" = "8:wave+.png"
+            "Tag" = "8:"
+            "Folder" = "8:_34281630B71C4B2A929759E2E5462B1F"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -2477,6 +2511,17 @@
                             }
                         }
                     }
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_34281630B71C4B2A929759E2E5462B1F"
+                    {
+                    "Name" = "8:assets"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_59201E7F0F4449E3AF344A25B70527B6"
+                        "Folders"
+                        {
+                        }
+                    }
                     "{9EF0B969-E518-4E46-987F-47570745A589}:_F528C4D58FB44A5182B81BE563409F65"
                     {
                     "Name" = "8:Image"
@@ -2527,9 +2572,9 @@
         "Product"
         {
         "Name" = "8:Microsoft Visual Studio"
-        "ProductName" = "8:3D-Recon-setup"
+        "ProductName" = "8:WAVE-3D-Recon"
         "ProductCode" = "8:{DBF08F5A-D69F-42A9-B7E5-55947C2608AC}"
-        "PackageCode" = "8:{0270C307-B60D-44C2-87C4-F2B543D01975}"
+        "PackageCode" = "8:{C7099601-94A1-4D97-B354-375CF5446B41}"
         "UpgradeCode" = "8:{2F4AB90C-98C7-48AB-A131-554633D19863}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
@@ -2537,12 +2582,12 @@
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
         "ProductVersion" = "8:1.0.0"
-        "Manufacturer" = "8:Default Company Name"
+        "Manufacturer" = "8:PLUS_WAVE"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
-        "Title" = "8:3D-Recon-setup"
+        "Title" = "8:WAVE-3D-Recon"
         "Subject" = "8:"
-        "ARPCONTACT" = "8:Default Company Name"
+        "ARPCONTACT" = "8:PLUS_WAVE"
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:"
         "ARPURLINFOABOUT" = "8:"
@@ -2651,7 +2696,7 @@
         {
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_5BCC08C48FE84C88B9E12F9033EFD1DD"
             {
-            "Name" = "8:5thGroup-3D-Rencon"
+            "Name" = "8:WAVE-3D-Rencon"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"

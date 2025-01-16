@@ -50,7 +50,7 @@ private:
     void executeMVS();
 
 private slots:
-    void show_set_pi();
+    // void show_set_pi();
     void onStartShooting();
     void onPiSSHSelect();
     void onPiFolderSelect();

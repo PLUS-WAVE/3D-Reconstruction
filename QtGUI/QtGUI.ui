@@ -11,25 +11,22 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>第五组-三维重建平台（需要CUDA v12.5）</string>
+   <string>WAVE-3D重建平台（需要CUDAv12.5）</string>
+  </property>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>assets/wave+.png</normaloff>assets/wave+.png</iconset>
   </property>
   <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
     <rect>
      <x>10</x>
      <y>-10</y>
-     <width>461</width>
+     <width>411</width>
      <height>61</height>
     </rect>
    </property>
    <layout class="QHBoxLayout" name="horizontalLayout">
-    <item>
-     <widget class="QPushButton" name="pi_recon">
-      <property name="text">
-       <string>树莓派重建</string>
-      </property>
-     </widget>
-    </item>
     <item>
      <widget class="QPushButton" name="set_button">
       <property name="text">
