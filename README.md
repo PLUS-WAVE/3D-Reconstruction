@@ -9,11 +9,12 @@
 <h3 align="center">
  Windows 上基于 <a href="https://github.com/openMVG/openMVG">OpenMVG</a> + <a href="https://github.com/cdcseacave/openMVS">OpenMVS</a> 的3D重建平台
 </h3>
+
 ## 1 Preview
 
 平台运行效果的简短视频：
 
-<video src="./assets/Preview.mp4"></video>
+https://github.com/PLUS-WAVE/WAVE-3D-Reconstruction/blob/Qt5_wo_SSH/assets/Preview.mp4
 
 ## 2 Introduction
 
