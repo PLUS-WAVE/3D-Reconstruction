@@ -14,7 +14,9 @@
 
 平台运行效果的简短视频：
 
-https://github.com/PLUS-WAVE/WAVE-3D-Reconstruction/blob/Qt5_wo_SSH/assets/Preview.mp4
+https://github.com/user-attachments/assets/5714ac91-e7e6-47ac-973b-e31a2a9831a5
+
+
 
 ## 2 Introduction
 
